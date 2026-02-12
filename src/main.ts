@@ -8,9 +8,10 @@ configDotenv();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.API_PORT ?? 3000);
+  const API_PORT = process.env.API_PORT ?? 3000;
 
-  Logger.log(`API is running on port ${process.env.API_PORT ?? 3000}`, 'Main');
+  await app.listen(API_PORT);
+  Logger.log(`API is running on port ${API_PORT}`, 'Main');
 }
 
 void bootstrap();

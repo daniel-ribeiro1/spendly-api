@@ -13,4 +13,4 @@ async function bootstrap() {
   Logger.log(`API is running on port ${process.env.API_PORT ?? 3000}`, 'Main');
 }
 
-bootstrap();
+void bootstrap();

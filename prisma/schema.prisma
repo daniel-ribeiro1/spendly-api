@@ -13,3 +13,128 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model User {
+  id        String   @id @default(uuid()) @db.Char(36)
+  name      String   @db.VarChar(255)
+  picture   String?  @db.Text
+  email     String   @unique @db.VarChar(255)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  transactionFolders    TransactionFolder[]
+  transactionCategories TransactionCategory[]
+  transactions          Transaction[]
+}
+
+model TransactionFolder {
+  id          String   @id @default(uuid()) @db.Char(36)
+  name        String   @db.VarChar(255)
+  image       String?  @db.Text
+  description String?  @db.Text
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  userId      String   @db.Char(36)
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model TransactionType {
+  id        Int      @id @default(autoincrement()) @db.SmallInt
+  name      String   @db.VarChar(100)
+  order     Int      @db.SmallInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  transactions Transaction[]
+}
+
+model TransactionCategory {
+  id        String   @id @default(uuid()) @db.Char(36)
+  name      String   @db.VarChar(100)
+  image     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String?  @db.Char(36)
+
+  // Relations
+  user         User?         @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                    String   @id @default(uuid()) @db.Char(36)
+  amount                Decimal  @db.Decimal(10, 2)
+  description           String?  @db.Text
+  date                  DateTime @db.Date
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  userId                String   @db.Char(36)
+  transactionFolderId   String?  @db.Char(36)
+  transactionCategoryId String?  @db.Char(36)
+  transactionTypeId     Int      @db.SmallInt
+
+  // Relations
+  user                User                 @relation(fields: [userId], references: [id])
+  transactionFolder   TransactionFolder?   @relation(fields: [transactionFolderId], references: [id])
+  transactionCategory TransactionCategory? @relation(fields: [transactionCategoryId], references: [id])
+  transactionType     TransactionType      @relation(fields: [transactionTypeId], references: [id])
+  recurrencies        Recurrency[]
+}
+
+model RecurrencyType {
+  id        Int      @id @default(autoincrement()) @db.SmallInt
+  name      String   @db.VarChar(100)
+  order     Int      @db.SmallInt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  recurrencies Recurrency[]
+}
+
+model Recurrency {
+  id               String    @id @default(uuid()) @db.Char(36)
+  month_date       DateTime? @db.Date
+  start_date       DateTime  @db.Date
+  end_date         DateTime? @db.Date
+  interval         Int       @db.SmallInt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  recurrencyTypeId Int       @db.SmallInt
+  transactionId    String    @db.Char(36)
+
+  // Relations
+  recurrencyType RecurrencyType  @relation(fields: [recurrencyTypeId], references: [id])
+  transaction    Transaction     @relation(fields: [transactionId], references: [id])
+  recurrencyDays RecurrencyDay[]
+}
+
+enum RecurrencyDayEnum {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+model RecurrencyDay {
+  id           Int               @id @default(autoincrement()) @db.SmallInt
+  dayOfWeek    RecurrencyDayEnum
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  recurrencyId String            @db.Char(36)
+
+  // Relations
+  recurrency Recurrency @relation(fields: [recurrencyId], references: [id])
+
+  // Constraints
+  @@unique([recurrencyId, dayOfWeek])
+}

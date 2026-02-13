@@ -1,7 +1,7 @@
 import { configDotenv } from 'dotenv';
 
 import { AppModule } from '@/app.module';
-import { setupSwagger } from '@/configs/swagger.config';
+import { setupSwagger } from '@/core/configs/swagger.config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 

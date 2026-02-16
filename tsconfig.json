@@ -23,7 +23,9 @@
     "noFallthroughCasesInSwitch": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@/config/*": ["./src/core/configs/*"]
+      "@/config/*": ["./src/core/configs/*"],
+      "@/modules/*": ["./src/modules/*"],
+      "@/prisma/*": ["./prisma/*"]
     }
   }
 }

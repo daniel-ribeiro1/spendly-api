@@ -5,9 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider     = "prisma-client"
-  output       = "../generated/prisma"
-  moduleFormat = "cjs"
+  provider = "prisma-client-js"
 }
 
 datasource db {
@@ -20,6 +18,7 @@ model User {
   picture   String?  @db.Text
   email     String   @unique @db.VarChar(255)
   password  String   @db.VarChar(255)
+  isActive  Boolean  @default(true) @db.Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

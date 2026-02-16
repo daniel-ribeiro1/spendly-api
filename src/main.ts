@@ -1,6 +1,7 @@
 import { configDotenv } from 'dotenv';
 
 import { AppModule } from '@/app.module';
+import { setupRequestValidation } from '@/core/configs/request-validation.config';
 import { setupSwagger } from '@/core/configs/swagger.config';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -8,12 +9,13 @@ import { NestFactory } from '@nestjs/core';
 configDotenv();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
   const API_PORT = process.env.API_PORT ?? 3000;
   const SWAGGER_PATH = 'swagger';
 
-  setupSwagger(app);
+  const app = await NestFactory.create(AppModule);
+
+  setupRequestValidation(app);
+  setupSwagger(app, SWAGGER_PATH);
 
   await app.listen(API_PORT);
 

@@ -1,5 +1,9 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "importSorter.generalConfiguration.sortOnBeforeSave": true
+  "editor.tabSize": 2,
+  "importSorter.generalConfiguration.sortOnBeforeSave": false,
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  }
 }

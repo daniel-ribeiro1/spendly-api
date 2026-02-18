@@ -3,6 +3,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AuthModule } from '@/modules/auth/auth.module';
+import { SignInDto } from '@/modules/auth/dtos/sign-in.dto';
 import { SignUpDto } from '@/modules/auth/dtos/sign-up.dto';
 import { GlobalModule } from '@/modules/global/global.module';
 import { UserModule } from '@/modules/user/user.module';
@@ -41,9 +42,13 @@ describe('AuthController (E2E)', () => {
     };
 
     beforeEach(async () => {
-      await prismaService.user.delete({
-        where: { email: signUpDto.email },
-      });
+      try {
+        await prismaService.user.delete({
+          where: { email: signUpDto.email },
+        });
+      } catch {
+        // ignore
+      }
     });
 
     it('should create a new user', () => {
@@ -79,6 +84,90 @@ describe('AuthController (E2E)', () => {
             exception: Exception.USER_ALREADY_EXISTS,
             message: i18nService.t(
               `exceptions.${Exception.USER_ALREADY_EXISTS}`,
+            ),
+          });
+        });
+    });
+  });
+
+  describe('(POST) /auth/sign-in', () => {
+    const signUpDto: SignUpDto = {
+      name: 'Admin 2 do Sistema',
+      password: 'Senh@123456',
+      email: 'admin2@example.com',
+      picture: null,
+    };
+
+    const signInDto: SignInDto = {
+      email: signUpDto.email,
+      password: signUpDto.password,
+    };
+
+    beforeEach(async () => {
+      try {
+        await prismaService.user.delete({
+          where: { email: signUpDto.email },
+        });
+      } catch {
+        // ignore
+      }
+    });
+
+    it('should authenticate a user', async () => {
+      await request(app.getHttpServer()).post('/auth/sign-up').send(signUpDto);
+
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send(signInDto)
+        .expect(HttpStatus.CREATED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('accessToken');
+          expect(res.body).toHaveProperty('refreshToken');
+        });
+    });
+
+    it('should throw an error if user is not found', async () => {
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send(signInDto)
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+          expect(res.body).toMatchObject({
+            path: '/auth/sign-in',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.INVALID_CREDENTIALS,
+            message: i18nService.t(
+              `exceptions.${Exception.INVALID_CREDENTIALS}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if user password is invalid', async () => {
+      await request(app.getHttpServer()).post('/auth/sign-up').send(signUpDto);
+
+      return request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          email: signInDto.email,
+          password: 'invalidPassword',
+        })
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+          expect(res.body).toMatchObject({
+            path: '/auth/sign-in',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.INVALID_CREDENTIALS,
+            message: i18nService.t(
+              `exceptions.${Exception.INVALID_CREDENTIALS}`,
             ),
           });
         });

@@ -10,14 +10,7 @@ export class SignUpDto extends OmitType(UserEntity, [
   'updatedAt',
 ]) {}
 
-export class SignUpResponseSwagger extends OmitType(UserEntity, [
-  'isActive',
-  'password',
-  'createdAt',
-  'updatedAt',
-]) {}
-
-export class SignUpResponse implements Pick<
+export class SignUpResponseDto implements Pick<
   UserEntity,
   'id' | 'name' | 'email' | 'picture'
 > {

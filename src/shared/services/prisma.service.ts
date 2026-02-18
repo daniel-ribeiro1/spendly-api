@@ -5,7 +5,6 @@ import {
   OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import * as DatabaseClient from '@prisma/client/runtime/client';
 
@@ -16,7 +15,6 @@ export class PrismaService
 {
   constructor(
     @Inject(PEISMA_ADAPTER) adapter: DatabaseClient.SqlDriverAdapterFactory,
-    readonly configService: ConfigService,
   ) {
     super({
       adapter,

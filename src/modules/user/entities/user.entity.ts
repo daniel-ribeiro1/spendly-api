@@ -2,6 +2,7 @@ import {
   IsEmail,
   IsOptional,
   IsString,
+  IsStrongPassword,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -39,6 +40,13 @@ export class UserEntity implements User {
   @IsString()
   @MinLength(6)
   @MaxLength(20)
+  @IsStrongPassword({
+    minLength: 6,
+    minLowercase: 1,
+    minUppercase: 1,
+    minNumbers: 1,
+    minSymbols: 1,
+  })
   password: string;
 
   @ApiProperty({

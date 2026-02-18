@@ -1,4 +1,5 @@
 {
-  "USER_ALREADY_EXISTS": "User already exists.",
+  "INVALID_CREDENTIALS": "Invalid email or password.",
+  "USER_ALREADY_EXISTS": "A user with this email already exists.",
   "USER_NOT_FOUND": "User not found."
 }

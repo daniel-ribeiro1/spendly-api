@@ -1,13 +1,14 @@
 import { RequestException } from '@/core/exceptions/request.exception';
+import { SignInDto } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpDto } from '@/modules/auth/dtos/sign-up.dto';
+import { AuthService } from '@/modules/auth/services/auth.service';
+import { UserJwtService } from '@/modules/user/services/user-jwt.service';
 import { UserService } from '@/modules/user/services/user.service';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { EncryptionUtil } from '@/shared/utils/encryption.util';
 import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { User } from '@prisma/client';
-
-import { SignUpDto } from '../dtos/sign-up.dto';
-import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -20,6 +21,13 @@ describe('AuthService', () => {
         {
           provide: UserService,
           useValue: { findByEmail: jest.fn(), create: jest.fn() },
+        },
+        {
+          provide: UserJwtService,
+          useValue: {
+            createAccessToken: jest.fn(),
+            createRefreshToken: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -85,6 +93,82 @@ describe('AuthService', () => {
       const user = await authService.signUp(mockedSignUpDto);
 
       expect(user.password).not.toBe(mockedSignUpDto.password);
+    });
+  });
+
+  describe('sign-in', () => {
+    const mockedUser: User = {
+      id: '123e4567-e89b-12d3-a456-426655440000',
+      name: 'Admin do Sistema',
+      email: 'admin@example.com',
+      password: 'encryptedPassword',
+      picture: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should authenticate a user', async () => {
+      // Compara a senha criptografada com a senha informada
+      jest.spyOn(EncryptionUtil, 'compare').mockResolvedValue(true);
+
+      const signInDto: SignInDto = {
+        email: mockedUser.email,
+        password: mockedUser.password,
+      };
+
+      userService.findByEmail.mockResolvedValue(mockedUser);
+
+      const user = await authService.signIn(signInDto);
+
+      expect(user).toBeDefined();
+      expect(user).toHaveProperty('accessToken');
+      expect(user).toHaveProperty('refreshToken');
+    });
+
+    it('should throw an error if user is not found', async () => {
+      const signInDto: SignInDto = {
+        email: mockedUser.email,
+        password: mockedUser.password,
+      };
+
+      userService.findByEmail.mockRejectedValue(
+        new RequestException(Exception.USER_NOT_FOUND, HttpStatus.NOT_FOUND),
+      );
+
+      await expect(authService.signIn(signInDto)).rejects.toThrow();
+
+      await expect(authService.signIn(signInDto)).rejects.toBeInstanceOf(
+        RequestException,
+      );
+
+      await expect(authService.signIn(signInDto)).rejects.toMatchObject({
+        exception: Exception.INVALID_CREDENTIALS,
+        status: HttpStatus.UNAUTHORIZED,
+      });
+    });
+
+    it('should throw an error if password is incorrect', async () => {
+      // Compara a senha criptografada com a senha informada
+      jest.spyOn(EncryptionUtil, 'compare').mockResolvedValue(false);
+
+      const signInDto: SignInDto = {
+        email: mockedUser.email,
+        password: 'invalidPassword',
+      };
+
+      userService.findByEmail.mockResolvedValue(mockedUser);
+
+      await expect(authService.signIn(signInDto)).rejects.toThrow();
+
+      await expect(authService.signIn(signInDto)).rejects.toBeInstanceOf(
+        RequestException,
+      );
+
+      await expect(authService.signIn(signInDto)).rejects.toMatchObject({
+        exception: Exception.INVALID_CREDENTIALS,
+        status: HttpStatus.UNAUTHORIZED,
+      });
     });
   });
 });

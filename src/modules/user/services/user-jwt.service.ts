@@ -25,6 +25,14 @@ export class UserJwtService {
     return this._sign(payload, EXPIRES_IN);
   }
 
+  decodeAccessToken(token: string): UserJwtPayload {
+    const API_SECRET = this.configService.getOrThrow<string>(
+      EnvironmentKey.API_SECRET,
+    );
+
+    return jwt.verify(token, API_SECRET) as UserJwtPayload;
+  }
+
   private _sign(
     payload: Pick<UserJwtPayload, 'id'> & Partial<Omit<UserJwtPayload, 'id'>>,
     expiresIn: jwt.SignOptions['expiresIn'],

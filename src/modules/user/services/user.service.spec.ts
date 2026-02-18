@@ -19,6 +19,7 @@ describe('UserService', () => {
           useValue: {
             create: jest.fn(),
             findByEmail: jest.fn(),
+            findById: jest.fn(),
           },
         },
       ],
@@ -91,6 +92,43 @@ describe('UserService', () => {
 
       expect(user).toBeDefined();
       expect(user).toBe(mockedUser);
+    });
+  });
+
+  describe('findById', () => {
+    const mockedUser: User = {
+      id: '123e4567-e89b-12d3-a456-426655440000',
+      name: 'Admin do Sistema',
+      email: 'admin@example.com',
+      password: 'Senh@123456',
+      picture: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should return a existing user', async () => {
+      userRepository.findById.mockResolvedValue(mockedUser);
+
+      const user = await userService.findById(mockedUser.id);
+
+      expect(user).toBeDefined();
+      expect(user).toBe(mockedUser);
+    });
+
+    it('should throw an error if user is not found', async () => {
+      userRepository.findById.mockResolvedValue(null);
+
+      await expect(userService.findById('nonexistent-id')).rejects.toThrow();
+
+      await expect(userService.findById('id')).rejects.toBeInstanceOf(
+        RequestException,
+      );
+
+      await expect(userService.findById('id')).rejects.toMatchObject({
+        exception: Exception.USER_NOT_FOUND,
+        status: HttpStatus.NOT_FOUND,
+      });
     });
   });
 });

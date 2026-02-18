@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 import { EnvironmentKey } from '@/shared/enums/environment.enum';
+import { Exception } from '@/shared/enums/exceptions.enum';
 import { UserJwtPayload } from '@/shared/types/user-jwt.type';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -30,7 +31,13 @@ export class UserJwtService {
       EnvironmentKey.API_SECRET,
     );
 
-    return jwt.verify(token, API_SECRET) as UserJwtPayload;
+    try {
+      jwt.verify(token, API_SECRET) as UserJwtPayload;
+
+      return jwt.decode(token) as UserJwtPayload;
+    } catch {
+      throw new Error(Exception.INVALID_TOKEN);
+    }
   }
 
   private _sign(

@@ -30,18 +30,28 @@ export class AuthorizationMiddleware implements NestMiddleware {
         HttpStatus.UNAUTHORIZED,
       );
 
-    const jwtPayload = this.userJwtService.decodeAccessToken(token);
-
     try {
+      const jwtPayload = this.userJwtService.decodeAccessToken(token);
       const user = await this.userService.findById(jwtPayload.id);
 
-      this.localStorageService.set('user', {
+      this.localStorageService.set('requester', {
         id: user.id,
         name: user.name,
         email: user.email,
       });
     } catch (error) {
-      if (!(error instanceof RequestException)) throw error;
+      if (!(error instanceof RequestException)) {
+        if (
+          error instanceof Error &&
+          error.message == (Exception.INVALID_TOKEN as string)
+        )
+          throw new RequestException(
+            Exception.INVALID_TOKEN,
+            HttpStatus.UNAUTHORIZED,
+          );
+
+        throw error;
+      }
 
       if (error.exception === Exception.USER_NOT_FOUND)
         throw new RequestException(

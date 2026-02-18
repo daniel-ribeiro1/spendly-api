@@ -1,5 +1,6 @@
 {
   "INVALID_CREDENTIALS": "Invalid email or password.",
+  "INVALID_TOKEN": "Invalid token.",
   "UNAUTHORIZED": "User is not authorized.",
   "USER_ALREADY_EXISTS": "A user with this email already exists.",
   "USER_NOT_FOUND": "User not found."

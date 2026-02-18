@@ -1,5 +1,5 @@
 import { Exception } from '@/shared/enums/exceptions.enum';
-import { createRequestExceptionSwaggerModel } from '@/shared/swagger.ts/request-exception.swagger';
+import { createRequestExceptionSwaggerModel } from '@/shared/swagger/request-exception.swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
   ApiCreatedResponse,

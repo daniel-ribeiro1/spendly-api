@@ -1,6 +1,8 @@
 {
+  "FORBIDDEN": "Access denied: You do not have permission to access this resource.",
   "INVALID_CREDENTIALS": "Invalid email or password.",
   "INVALID_TOKEN": "Invalid token.",
+  "TRANSACTION_FOLDER_NOT_FOUND": "Transaction folder not found.",
   "UNAUTHORIZED": "User is not authorized.",
   "USER_ALREADY_EXISTS": "A user with this email already exists.",
   "USER_NOT_FOUND": "User not found."

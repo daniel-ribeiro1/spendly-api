@@ -3,26 +3,36 @@ import { Exception } from '@/shared/enums/exceptions.enum';
 import { createRequestExceptionSwaggerModel } from '@/shared/swagger/request-exception.swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
-  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
   OmitType,
 } from '@nestjs/swagger';
 
-export class CreateTransactionFolderSwaggerModel extends OmitType(
+export class UpdateTransactionFolderSwaggerModel extends OmitType(
   TransactionFolderEntity,
   ['isActive', 'userId'],
 ) {}
 
-export function CreateTransactionFolderResponseSwagger(): MethodDecorator &
+export function UpdateTransactionFolderResponseSwagger(): MethodDecorator &
   ClassDecorator {
   return applyDecorators(
     ApiOperation({
-      summary: 'Criar uma pasta de movimentação financeira do usuário.',
+      summary: 'Atualiza uma pasta de movimentação financeira do usuário.',
     }),
-    ApiCreatedResponse({
-      type: CreateTransactionFolderSwaggerModel,
-      description: 'Pasta de movimentação financeira criada com sucesso.',
+    ApiOkResponse({
+      type: UpdateTransactionFolderSwaggerModel,
+      description: 'Pasta de movimentação financeira atualizada com sucesso.',
+    }),
+    ApiNotFoundResponse({
+      description: 'Pasta de movimentação financeira não encontrada.',
+      type: createRequestExceptionSwaggerModel({
+        path: '/transaction-folder',
+        status: HttpStatus.NOT_FOUND,
+        exception: Exception.TRANSACTION_FOLDER_NOT_FOUND,
+        message: 'Transaction folder not found.',
+      }),
     }),
     ApiUnauthorizedResponse({
       description:

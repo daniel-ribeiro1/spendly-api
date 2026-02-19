@@ -1,5 +1,3 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TransactionFolder } from '@prisma/client';
 import {
   IsBoolean,
   IsDateString,
@@ -10,6 +8,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+
+import { IsStrictOptional } from '@/shared/decorators/is-strict-optional.decorator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { TransactionFolder } from '@prisma/client';
 
 export class TransactionFolderEntity implements TransactionFolder {
   @ApiProperty({
@@ -24,9 +26,10 @@ export class TransactionFolderEntity implements TransactionFolder {
     description: 'Nome da pasta de movimentação do usuário',
     example: 'Gerenciamento de gastos',
   })
+  @IsStrictOptional()
   @IsString()
   @MinLength(3)
-  @MaxLength(500)
+  @MaxLength(255)
   name: string;
 
   @ApiPropertyOptional({

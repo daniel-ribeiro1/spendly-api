@@ -41,14 +41,15 @@ describe('AuthController (E2E)', () => {
       picture: null,
     };
 
-    beforeEach(async () => {
-      try {
+    afterEach(async () => {
+      const user = await prismaService.user.findUnique({
+        where: { email: signUpDto.email },
+      });
+
+      if (user)
         await prismaService.user.delete({
-          where: { email: signUpDto.email },
+          where: { id: user.id },
         });
-      } catch {
-        // ignore
-      }
     });
 
     it('should create a new user', () => {
@@ -103,14 +104,15 @@ describe('AuthController (E2E)', () => {
       password: signUpDto.password,
     };
 
-    beforeEach(async () => {
-      try {
+    afterEach(async () => {
+      const user = await prismaService.user.findUnique({
+        where: { email: signUpDto.email },
+      });
+
+      if (user)
         await prismaService.user.delete({
-          where: { email: signUpDto.email },
+          where: { id: user.id },
         });
-      } catch {
-        // ignore
-      }
     });
 
     it('should authenticate a user', async () => {

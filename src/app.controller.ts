@@ -1,9 +1,12 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 @Controller()
 export class AppController {
   @Get('health-check')
+  @ApiOperation({
+    summary: 'Check if the API is healthy.',
+  })
   @ApiOkResponse({
     description: 'The API is healthy.',
     example: true,

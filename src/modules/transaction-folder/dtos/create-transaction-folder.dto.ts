@@ -1,6 +1,7 @@
+import { Expose } from 'class-transformer';
+
 import { TransactionFolderEntity } from '@/modules/transaction-folder/entities/transaction-folder.entity';
 import { PickType } from '@nestjs/swagger';
-import { Expose } from 'class-transformer';
 
 export class CreateTransactionFolderDto extends PickType(
   TransactionFolderEntity,

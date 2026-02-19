@@ -1,5 +1,5 @@
-import { SignInDto, SignInResponseDto } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpDto, SignUpResponseDto } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody, SignUpResponse } from '@/modules/auth/dtos/sign-up.dto';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { SignInResponseSwagger } from '@/modules/auth/swagger/sign-in.swagger';
 import { SignUpResponseSwagger } from '@/modules/auth/swagger/sign-up.swagger';
@@ -11,15 +11,15 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('sign-up')
-  @Serialize(SignUpResponseDto)
+  @Serialize(SignUpResponse)
   @SignUpResponseSwagger()
-  signUp(@Body() body: SignUpDto): Promise<SignUpResponseDto> {
+  signUp(@Body() body: SignUpBody): Promise<SignUpResponse> {
     return this.authService.signUp(body);
   }
 
   @Post('sign-in')
   @SignInResponseSwagger()
-  signIn(@Body() body: SignInDto): Promise<SignInResponseDto> {
+  signIn(@Body() body: SignInBody): Promise<SignInResponse> {
     return this.authService.signIn(body);
   }
 }

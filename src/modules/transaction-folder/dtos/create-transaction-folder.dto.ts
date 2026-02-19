@@ -3,12 +3,12 @@ import { Expose } from 'class-transformer';
 import { TransactionFolderEntity } from '@/modules/transaction-folder/entities/transaction-folder.entity';
 import { PickType } from '@nestjs/swagger';
 
-export class CreateTransactionFolderDto extends PickType(
+export class CreateTransactionFolderBody extends PickType(
   TransactionFolderEntity,
   ['name', 'description', 'image'],
 ) {}
 
-export class CreateTransactionFolderResponseDto implements Omit<
+export class CreateTransactionFolderResponse implements Omit<
   TransactionFolderEntity,
   'isActive' | 'userId'
 > {

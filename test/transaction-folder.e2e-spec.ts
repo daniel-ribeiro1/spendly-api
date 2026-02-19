@@ -4,12 +4,12 @@ import { App } from 'supertest/types';
 
 import { AppModule } from '@/app.module';
 import { AuthModule } from '@/modules/auth/auth.module';
-import { SignInDto, SignInResponseDto } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpDto } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
 import { GlobalModule } from '@/modules/global/global.module';
 import {
-  CreateTransactionFolderDto,
-  CreateTransactionFolderResponseDto,
+  CreateTransactionFolderBody,
+  CreateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
 import { TransactionFolderModule } from '@/modules/transaction-folder/transaction-folder.module';
 import { UserModule } from '@/modules/user/user.module';
@@ -24,14 +24,14 @@ describe('TransactionFolderController (E2E)', () => {
   let i18nService: I18nService;
   let accessToken: string;
 
-  const requesterSignUpDto: SignUpDto = {
+  const requesterSignUpDto: SignUpBody = {
     name: 'E2E User',
     email: 'e2e@example.com',
     password: 'Senh@123456',
     picture: null,
   };
 
-  const requesterSignInDto: SignInDto = {
+  const requesterSignInDto: SignInBody = {
     email: requesterSignUpDto.email,
     password: requesterSignUpDto.password,
   };
@@ -62,7 +62,7 @@ describe('TransactionFolderController (E2E)', () => {
         .post('/auth/sign-in')
         .send(requesterSignInDto);
 
-      const body = response.body as SignInResponseDto;
+      const body = response.body as SignInResponse;
       accessToken = body.accessToken;
     }
   });
@@ -97,7 +97,7 @@ describe('TransactionFolderController (E2E)', () => {
 
   describe('(POST) /transaction-folder', () => {
     it('should create a new transaction folder', () => {
-      const body: CreateTransactionFolderDto = {
+      const body: CreateTransactionFolderBody = {
         name: 'E2E Transaction Folder',
         description: 'E2E Transaction Folder Description',
         image: null,
@@ -142,7 +142,7 @@ describe('TransactionFolderController (E2E)', () => {
 
   describe('(PATCH) /transaction-folder/:id', () => {
     it('should update a transaction folder', () => {
-      const body: CreateTransactionFolderDto = {
+      const body: CreateTransactionFolderBody = {
         name: 'E2E Transaction Folder',
         description: 'E2E Transaction Folder Description',
         image: null,
@@ -154,7 +154,7 @@ describe('TransactionFolderController (E2E)', () => {
         .send(body)
         .expect(HttpStatus.CREATED)
         .expect((res) => {
-          const response = res.body as CreateTransactionFolderResponseDto;
+          const response = res.body as CreateTransactionFolderResponse;
           const updateBody = {
             name: 'E2E Transaction Folder Updated',
           };
@@ -181,7 +181,7 @@ describe('TransactionFolderController (E2E)', () => {
     });
 
     it('should throw an error if user is not authenticated', () => {
-      const body: CreateTransactionFolderDto = {
+      const body: CreateTransactionFolderBody = {
         name: 'E2E Transaction Folder',
         description: 'E2E Transaction Folder Description',
         image: null,
@@ -193,7 +193,7 @@ describe('TransactionFolderController (E2E)', () => {
         .send(body)
         .expect(HttpStatus.CREATED)
         .expect((res) => {
-          const response = res.body as CreateTransactionFolderResponseDto;
+          const response = res.body as CreateTransactionFolderResponse;
           const updateBody = {
             name: 'E2E Transaction Folder Updated',
           };

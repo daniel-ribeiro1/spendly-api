@@ -3,14 +3,14 @@ import { Exclude, Expose } from 'class-transformer';
 import { UserEntity } from '@/modules/user/entities/user.entity';
 import { OmitType } from '@nestjs/swagger';
 
-export class SignUpDto extends OmitType(UserEntity, [
+export class SignUpBody extends OmitType(UserEntity, [
   'id',
   'isActive',
   'createdAt',
   'updatedAt',
 ]) {}
 
-export class SignUpResponseDto implements Pick<
+export class SignUpResponse implements Pick<
   UserEntity,
   'id' | 'name' | 'email' | 'picture'
 > {

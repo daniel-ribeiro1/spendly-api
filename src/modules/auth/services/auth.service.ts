@@ -1,6 +1,6 @@
 import { RequestException } from '@/core/exceptions/request.exception';
-import { SignInDto, SignInResponseDto } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpDto, SignUpResponseDto } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody, SignUpResponse } from '@/modules/auth/dtos/sign-up.dto';
 import { UserJwtService } from '@/modules/user/services/user-jwt.service';
 import { UserService } from '@/modules/user/services/user.service';
 import { Exception } from '@/shared/enums/exceptions.enum';
@@ -14,7 +14,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async signUp(body: SignUpDto): Promise<SignUpResponseDto> {
+  async signUp(body: SignUpBody): Promise<SignUpResponse> {
     try {
       const user = await this.userService.findByEmail(body.email);
 
@@ -41,7 +41,7 @@ export class AuthService {
     });
   }
 
-  async signIn(body: SignInDto): Promise<SignInResponseDto> {
+  async signIn(body: SignInBody): Promise<SignInResponse> {
     try {
       const user = await this.userService.findByEmail(body.email);
       const doesPasswordMatch = await EncryptionUtil.compare(

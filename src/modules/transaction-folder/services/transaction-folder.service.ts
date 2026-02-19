@@ -1,11 +1,11 @@
 import { RequestException } from '@/core/exceptions/request.exception';
 import {
-  CreateTransactionFolderDto,
-  CreateTransactionFolderResponseDto,
+  CreateTransactionFolderBody,
+  CreateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
 import {
-  UpdateTransactionFolderDto,
-  UpdateTransactionFolderResponseDto,
+  UpdateTransactionFolderBody,
+  UpdateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { Exception } from '@/shared/enums/exceptions.enum';
@@ -20,8 +20,8 @@ export class TransactionFolderService {
   ) {}
 
   async create(
-    body: CreateTransactionFolderDto,
-  ): Promise<CreateTransactionFolderResponseDto> {
+    body: CreateTransactionFolderBody,
+  ): Promise<CreateTransactionFolderResponse> {
     const requester = this.localStorageService.get('requester');
 
     return this.transactionFolderRepository.create({
@@ -32,8 +32,8 @@ export class TransactionFolderService {
 
   async update(
     id: string,
-    body: UpdateTransactionFolderDto,
-  ): Promise<UpdateTransactionFolderResponseDto> {
+    body: UpdateTransactionFolderBody,
+  ): Promise<UpdateTransactionFolderResponse> {
     const requester = this.localStorageService.get('requester');
     const transactionFolder =
       await this.transactionFolderRepository.findByIdAndUserId(

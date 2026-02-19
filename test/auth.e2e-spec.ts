@@ -3,8 +3,8 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AuthModule } from '@/modules/auth/auth.module';
-import { SignInDto } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpDto } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
 import { GlobalModule } from '@/modules/global/global.module';
 import { UserModule } from '@/modules/user/user.module';
 import { Exception } from '@/shared/enums/exceptions.enum';
@@ -34,7 +34,7 @@ describe('AuthController (E2E)', () => {
   });
 
   describe('(POST) /auth/sign-up', () => {
-    const signUpDto: SignUpDto = {
+    const signUpDto: SignUpBody = {
       name: 'Admin do Sistema',
       password: 'Senh@123456',
       email: 'admin@example.com',
@@ -92,14 +92,14 @@ describe('AuthController (E2E)', () => {
   });
 
   describe('(POST) /auth/sign-in', () => {
-    const signUpDto: SignUpDto = {
+    const signUpDto: SignUpBody = {
       name: 'Admin 2 do Sistema',
       password: 'Senh@123456',
       email: 'admin2@example.com',
       picture: null,
     };
 
-    const signInDto: SignInDto = {
+    const signInDto: SignInBody = {
       email: signUpDto.email,
       password: signUpDto.password,
     };

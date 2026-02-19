@@ -3,12 +3,12 @@ import { Expose } from 'class-transformer';
 import { TransactionFolderEntity } from '@/modules/transaction-folder/entities/transaction-folder.entity';
 import { IntersectionType, PartialType, PickType } from '@nestjs/swagger';
 
-export class UpdateTransactionFolderDto extends IntersectionType(
+export class UpdateTransactionFolderBody extends IntersectionType(
   PickType(TransactionFolderEntity, ['name']),
   PartialType(PickType(TransactionFolderEntity, ['description', 'image'])),
 ) {}
 
-export class UpdateTransactionFolderResponseDto implements Omit<
+export class UpdateTransactionFolderResponse implements Omit<
   TransactionFolderEntity,
   'isActive' | 'userId'
 > {

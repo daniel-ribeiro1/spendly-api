@@ -1,6 +1,6 @@
 import { RequestException } from '@/core/exceptions/request.exception';
-import { SignInDto } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpDto } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody, SignUpResponse } from '@/modules/auth/dtos/sign-up.dto';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { UserJwtService } from '@/modules/user/services/user-jwt.service';
 import { UserService } from '@/modules/user/services/user.service';
@@ -37,7 +37,7 @@ describe('AuthService', () => {
   });
 
   describe('signUp', () => {
-    const mockedSignUpDto: SignUpDto = {
+    const mockedSignUpDto: SignUpBody = {
       name: 'Admin do Sistema',
       password: 'Senh@123456',
       email: 'admin@example.com',
@@ -58,7 +58,9 @@ describe('AuthService', () => {
     it('should create a new user', async () => {
       userService.create.mockResolvedValue(mockedCreatedUser);
 
-      const user = await authService.signUp(mockedSignUpDto);
+      const user = (await authService.signUp(
+        mockedSignUpDto,
+      )) as SignUpResponse;
 
       expect(user).toBeDefined();
       expect(user).toBe(mockedCreatedUser);
@@ -90,7 +92,9 @@ describe('AuthService', () => {
         });
       });
 
-      const user = await authService.signUp(mockedSignUpDto);
+      const user = (await authService.signUp(
+        mockedSignUpDto,
+      )) as SignUpResponse;
 
       expect(user.password).not.toBe(mockedSignUpDto.password);
     });
@@ -112,14 +116,14 @@ describe('AuthService', () => {
       // Compara a senha criptografada com a senha informada
       jest.spyOn(EncryptionUtil, 'compare').mockResolvedValue(true);
 
-      const signInDto: SignInDto = {
+      const signInDto: SignInBody = {
         email: mockedUser.email,
         password: mockedUser.password,
       };
 
       userService.findByEmail.mockResolvedValue(mockedUser);
 
-      const user = await authService.signIn(signInDto);
+      const user = (await authService.signIn(signInDto)) as SignInResponse;
 
       expect(user).toBeDefined();
       expect(user).toHaveProperty('accessToken');
@@ -127,7 +131,7 @@ describe('AuthService', () => {
     });
 
     it('should throw an error if user is not found', async () => {
-      const signInDto: SignInDto = {
+      const signInDto: SignInBody = {
         email: mockedUser.email,
         password: mockedUser.password,
       };
@@ -152,7 +156,7 @@ describe('AuthService', () => {
       // Compara a senha criptografada com a senha informada
       jest.spyOn(EncryptionUtil, 'compare').mockResolvedValue(false);
 
-      const signInDto: SignInDto = {
+      const signInDto: SignInBody = {
         email: mockedUser.email,
         password: 'invalidPassword',
       };

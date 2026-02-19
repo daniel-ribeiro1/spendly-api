@@ -1,4 +1,12 @@
 import { RequestException } from '@/core/exceptions/request.exception';
+import {
+  CreateTransactionFolderBody,
+  CreateTransactionFolderResponse,
+} from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
+import {
+  UpdateTransactionFolderBody,
+  UpdateTransactionFolderResponse,
+} from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { TransactionFolderService } from '@/modules/transaction-folder/services/transaction-folder.service';
 import { Exception } from '@/shared/enums/exceptions.enum';
@@ -6,8 +14,6 @@ import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TransactionFolder } from '@prisma/client';
-
-import { CreateTransactionFolderResponseDto } from '../dtos/create-transaction-folder.dto';
 
 describe('TransactionFolderService', () => {
   let transactionFolderService: TransactionFolderService;
@@ -43,7 +49,7 @@ describe('TransactionFolderService', () => {
 
   describe('create', () => {
     it('should create a transaction folder', async () => {
-      const createTransactionFolderBody = {
+      const createTransactionFolderBody: CreateTransactionFolderBody = {
         name: 'Transaction Folder',
         image: 'https://example.com/image.jpg',
         description: 'Description',
@@ -66,24 +72,23 @@ describe('TransactionFolderService', () => {
         updatedAt: new Date(),
       };
 
-      const mockedTransactionFolderResponse: CreateTransactionFolderResponseDto =
-        {
-          id: mockedTransactionFolder.id,
-          name: mockedTransactionFolder.name,
-          description: mockedTransactionFolder.description,
-          image: mockedTransactionFolder.image,
-          createdAt: mockedTransactionFolder.createdAt,
-          updatedAt: mockedTransactionFolder.updatedAt,
-        };
+      const mockedTransactionFolderResponse: CreateTransactionFolderResponse = {
+        id: mockedTransactionFolder.id,
+        name: mockedTransactionFolder.name,
+        description: mockedTransactionFolder.description,
+        image: mockedTransactionFolder.image,
+        createdAt: mockedTransactionFolder.createdAt,
+        updatedAt: mockedTransactionFolder.updatedAt,
+      };
 
       localStorageService.get.mockReturnValue({ id: requester.id });
       transactionFolderRepository.create.mockResolvedValue(
         mockedTransactionFolder,
       );
 
-      const result = await transactionFolderService.create(
+      const result = (await transactionFolderService.create(
         createTransactionFolderBody,
-      );
+      )) as CreateTransactionFolderResponse;
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(mockedTransactionFolderResponse);
@@ -91,7 +96,7 @@ describe('TransactionFolderService', () => {
   });
 
   describe('update', () => {
-    const updateTransactionFolderBody = {
+    const updateTransactionFolderBody: UpdateTransactionFolderBody = {
       name: 'Updated Transaction Folder',
       image: 'https://example.com/updated-image.jpg',
       description: 'Updated Description',
@@ -106,23 +111,22 @@ describe('TransactionFolderService', () => {
     const mockedTransactionFolder: TransactionFolder = {
       id: '123e4567-e89b-12d3-a456-426655440000',
       name: updateTransactionFolderBody.name,
-      image: updateTransactionFolderBody.image,
-      description: updateTransactionFolderBody.description,
+      image: updateTransactionFolderBody.image || null,
+      description: updateTransactionFolderBody.description || null,
       userId: requester.id,
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
 
-    const mockedTransactionFolderResponse: CreateTransactionFolderResponseDto =
-      {
-        id: mockedTransactionFolder.id,
-        name: mockedTransactionFolder.name,
-        description: mockedTransactionFolder.description,
-        image: mockedTransactionFolder.image,
-        createdAt: mockedTransactionFolder.createdAt,
-        updatedAt: mockedTransactionFolder.updatedAt,
-      };
+    const mockedTransactionFolderResponse: CreateTransactionFolderResponse = {
+      id: mockedTransactionFolder.id,
+      name: mockedTransactionFolder.name,
+      description: mockedTransactionFolder.description,
+      image: mockedTransactionFolder.image,
+      createdAt: mockedTransactionFolder.createdAt,
+      updatedAt: mockedTransactionFolder.updatedAt,
+    };
 
     it('should update a transaction folder', async () => {
       localStorageService.get.mockReturnValue({ id: requester.id });
@@ -135,10 +139,10 @@ describe('TransactionFolderService', () => {
         mockedTransactionFolder,
       );
 
-      const result = await transactionFolderService.update(
+      const result = (await transactionFolderService.update(
         mockedTransactionFolder.id,
         updateTransactionFolderBody,
-      );
+      )) as UpdateTransactionFolderResponse;
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(mockedTransactionFolderResponse);

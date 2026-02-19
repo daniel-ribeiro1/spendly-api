@@ -4,12 +4,17 @@ import {
   CreateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
 import {
+  FindAllTransactionFolderResponse,
+  TransactionFolderPaginationQuery,
+} from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
+import {
   UpdateTransactionFolderBody,
   UpdateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
+import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -18,6 +23,17 @@ export class TransactionFolderService {
     private readonly localStorageService: LocalStorageService,
     private readonly transactionFolderRepository: TransactionFolderRepository,
   ) {}
+
+  findAll(
+    paginationQuery: TransactionFolderPaginationQuery,
+  ): Promise<PagedResponse<FindAllTransactionFolderResponse>> {
+    const requester = this.localStorageService.get('requester');
+
+    return this.transactionFolderRepository.findAllPaged(
+      requester.id,
+      paginationQuery,
+    );
+  }
 
   async create(
     body: CreateTransactionFolderBody,

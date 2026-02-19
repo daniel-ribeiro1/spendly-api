@@ -3,14 +3,13 @@ import {
   CreateTransactionFolderBody,
   CreateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
-import {
-  UpdateTransactionFolderBody,
-  UpdateTransactionFolderResponse,
-} from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
+import { FindAllTransactionFolderResponse } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
+import { UpdateTransactionFolderBody } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { TransactionFolderService } from '@/modules/transaction-folder/services/transaction-folder.service';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
+import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TransactionFolder } from '@prisma/client';
@@ -31,6 +30,7 @@ describe('TransactionFolderService', () => {
             update: jest.fn(),
             findById: jest.fn(),
             findByIdAndUserId: jest.fn(),
+            findAllPaged: jest.fn(),
           },
         },
         {
@@ -86,9 +86,9 @@ describe('TransactionFolderService', () => {
         mockedTransactionFolder,
       );
 
-      const result = (await transactionFolderService.create(
+      const result = await transactionFolderService.create(
         createTransactionFolderBody,
-      )) as CreateTransactionFolderResponse;
+      );
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(mockedTransactionFolderResponse);
@@ -139,10 +139,10 @@ describe('TransactionFolderService', () => {
         mockedTransactionFolder,
       );
 
-      const result = (await transactionFolderService.update(
+      const result = await transactionFolderService.update(
         mockedTransactionFolder.id,
         updateTransactionFolderBody,
-      )) as UpdateTransactionFolderResponse;
+      );
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(mockedTransactionFolderResponse);
@@ -178,6 +178,63 @@ describe('TransactionFolderService', () => {
           HttpStatus.NOT_FOUND,
         ),
       );
+    });
+  });
+
+  describe('findAll', () => {
+    it('should find all transaction folders', async () => {
+      const requester = {
+        id: '123e4567-e89b-12d3-a456-426655440000',
+        name: 'John Doe',
+        email: '6oXo9@example.com',
+      };
+
+      const transactionFolderResponse: FindAllTransactionFolderResponse = {
+        id: '123e4567-e89b-12d3-a456-426655440000',
+        name: 'Transaction Folder',
+        description: 'Description',
+        image: 'https://example.com/image.jpg',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const transactionFolderPagedResponse: PagedResponse<TransactionFolder> = {
+        data: [
+          {
+            ...transactionFolderResponse,
+            isActive: true,
+            userId: '123e4567-e89b-12d3-a456-426655440000',
+          },
+        ],
+        metadata: {
+          page: 1,
+          total: 1,
+          take: 10,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+
+      localStorageService.get.mockReturnValue(requester);
+
+      transactionFolderRepository.findAllPaged.mockResolvedValue(
+        transactionFolderPagedResponse,
+      );
+
+      const result = await transactionFolderService.findAll({
+        page: 1,
+        take: 10,
+      });
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(transactionFolderPagedResponse);
+
+      expect(result.data[0]).toHaveProperty('id');
+      expect(result.data[0]).toHaveProperty('name');
+      expect(result.data[0]).toHaveProperty('description');
+      expect(result.data[0]).toHaveProperty('image');
+      expect(result.data[0]).toHaveProperty('createdAt');
+      expect(result.data[0]).toHaveProperty('updatedAt');
     });
   });
 });

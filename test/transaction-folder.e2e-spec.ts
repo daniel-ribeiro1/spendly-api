@@ -11,8 +11,10 @@ import {
   CreateTransactionFolderBody,
   CreateTransactionFolderResponse,
 } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
+import { FindAllTransactionFolderResponse } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
 import { TransactionFolderModule } from '@/modules/transaction-folder/transaction-folder.module';
 import { UserModule } from '@/modules/user/user.module';
+import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { PrismaService } from '@/shared/services/prisma.service';
 import { HttpStatus, INestApplication } from '@nestjs/common';
@@ -235,6 +237,63 @@ describe('TransactionFolderController (E2E)', () => {
             message: i18nService.t(
               `exceptions.${Exception.TRANSACTION_FOLDER_NOT_FOUND}`,
             ),
+          });
+        });
+    });
+  });
+
+  describe('(GET) /transaction-folder', () => {
+    it('should get all transaction folders', () => {
+      const body: CreateTransactionFolderBody = {
+        name: 'E2E Transaction Folder',
+        description: 'E2E Transaction Folder Description',
+        image: null,
+      };
+
+      return request(app.getHttpServer())
+        .post('/transaction-folder')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(body)
+        .expect(HttpStatus.CREATED)
+        .expect((res) => {
+          const createdResponse = res.body as CreateTransactionFolderResponse;
+
+          return request(app.getHttpServer())
+            .get('/transaction-folder')
+            .set('Authorization', `Bearer ${accessToken}`)
+            .expect(HttpStatus.OK)
+            .expect((res) => {
+              const findAllResponse =
+                res.body as PagedResponse<FindAllTransactionFolderResponse>;
+              expect(findAllResponse.data[0]).toHaveProperty('id');
+              expect(findAllResponse.data[0]).toHaveProperty('name');
+              expect(findAllResponse.data[0]).toHaveProperty('description');
+              expect(findAllResponse.data[0]).toHaveProperty('image');
+              expect(findAllResponse.data[0]).toHaveProperty('createdAt');
+              expect(findAllResponse.data[0]).toHaveProperty('updatedAt');
+
+              expect(findAllResponse.data[0]).toMatchObject({
+                ...body,
+                id: createdResponse.id,
+              });
+            });
+        });
+    });
+
+    it('should throw an error if user is not authenticated', () => {
+      return request(app.getHttpServer())
+        .get('/transaction-folder')
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+          expect(res.body).toMatchObject({
+            path: '/transaction-folder',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.UNAUTHORIZED,
+            message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),
           });
         });
     });

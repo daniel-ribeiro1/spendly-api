@@ -1,15 +1,12 @@
 import { RequestException } from '@/core/exceptions/request.exception';
-import {
-  CreateTransactionFolderBody,
-  CreateTransactionFolderResponse,
-} from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
-import { FindAllTransactionFolderResponse } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
+import { CreateTransactionFolderBody } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
+import { DefaultTransactionFolderResponse } from '@/modules/transaction-folder/dtos/transaction-folder.dto';
 import { UpdateTransactionFolderBody } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { TransactionFolderService } from '@/modules/transaction-folder/services/transaction-folder.service';
+import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
-import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TransactionFolder } from '@prisma/client';
@@ -72,14 +69,15 @@ describe('TransactionFolderService', () => {
         updatedAt: new Date(),
       };
 
-      const mockedTransactionFolderResponse: CreateTransactionFolderResponse = {
-        id: mockedTransactionFolder.id,
-        name: mockedTransactionFolder.name,
-        description: mockedTransactionFolder.description,
-        image: mockedTransactionFolder.image,
-        createdAt: mockedTransactionFolder.createdAt,
-        updatedAt: mockedTransactionFolder.updatedAt,
-      };
+      const mockedTransactionFolderResponse: DefaultTransactionFolderResponse =
+        {
+          id: mockedTransactionFolder.id,
+          name: mockedTransactionFolder.name,
+          description: mockedTransactionFolder.description,
+          image: mockedTransactionFolder.image,
+          createdAt: mockedTransactionFolder.createdAt,
+          updatedAt: mockedTransactionFolder.updatedAt,
+        };
 
       localStorageService.get.mockReturnValue({ id: requester.id });
       transactionFolderRepository.create.mockResolvedValue(
@@ -119,7 +117,7 @@ describe('TransactionFolderService', () => {
       updatedAt: new Date(),
     };
 
-    const mockedTransactionFolderResponse: CreateTransactionFolderResponse = {
+    const mockedTransactionFolderResponse: DefaultTransactionFolderResponse = {
       id: mockedTransactionFolder.id,
       name: mockedTransactionFolder.name,
       description: mockedTransactionFolder.description,
@@ -189,7 +187,7 @@ describe('TransactionFolderService', () => {
         email: '6oXo9@example.com',
       };
 
-      const transactionFolderResponse: FindAllTransactionFolderResponse = {
+      const transactionFolderResponse: DefaultTransactionFolderResponse = {
         id: '123e4567-e89b-12d3-a456-426655440000',
         name: 'Transaction Folder',
         description: 'Description',
@@ -235,6 +233,72 @@ describe('TransactionFolderService', () => {
       expect(result.data[0]).toHaveProperty('image');
       expect(result.data[0]).toHaveProperty('createdAt');
       expect(result.data[0]).toHaveProperty('updatedAt');
+    });
+  });
+
+  describe('findOne', () => {
+    it('should find one transaction folder', async () => {
+      const requester = {
+        id: '123e4567-e89b-12d3-a456-426655440000',
+        name: 'John Doe',
+        email: '6oXo9@example.com',
+      };
+
+      const transactionFolder: TransactionFolder = {
+        id: '123e4567-e89b-12d3-a456-426655440000',
+        name: 'Transaction Folder',
+        image: 'https://example.com/image.jpg',
+        description: 'Description',
+        userId: requester.id,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      const transactionFolderResponse: DefaultTransactionFolderResponse =
+        transactionFolder;
+
+      localStorageService.get.mockReturnValue(requester);
+
+      transactionFolderRepository.findByIdAndUserId.mockResolvedValue(
+        transactionFolder,
+      );
+
+      const result = await transactionFolderService.findOne(
+        transactionFolder.id,
+      );
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(transactionFolderResponse);
+    });
+
+    it('should throw an error if transaction folder is not found', async () => {
+      const requester = {
+        id: '123e4567-e89b-12d3-a456-426655440000',
+        name: 'John Doe',
+        email: '6oXo9@example.com',
+      };
+
+      localStorageService.get.mockReturnValue(requester);
+
+      transactionFolderRepository.findByIdAndUserId.mockResolvedValue(null);
+
+      await expect(
+        transactionFolderService.findOne('nonexistent-id'),
+      ).rejects.toThrow();
+
+      await expect(
+        transactionFolderService.findOne('nonexistent-id'),
+      ).rejects.toBeInstanceOf(RequestException);
+
+      await expect(
+        transactionFolderService.findOne('nonexistent-id'),
+      ).rejects.toThrow(
+        new RequestException(
+          Exception.TRANSACTION_FOLDER_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 });

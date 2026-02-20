@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import { IsOptional } from 'class-validator';
 
 import { TransactionFolderEntity } from '@/modules/transaction-folder/entities/transaction-folder.entity';
@@ -8,29 +7,6 @@ import { OrderBy } from '@/shared/enums/pagination.enum';
 import { PaginationOptionsQuery } from '@/shared/dtos/pagination.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TransactionFolder } from '@prisma/client';
-
-export class FindAllTransactionFolderResponse implements Omit<
-  TransactionFolderEntity,
-  'isActive' | 'userId'
-> {
-  @Expose()
-  id: string;
-
-  @Expose()
-  name: string;
-
-  @Expose()
-  description: string | null;
-
-  @Expose()
-  image: string | null;
-
-  @Expose()
-  createdAt: Date;
-
-  @Expose()
-  updatedAt: Date;
-}
 
 export class TransactionFolderPaginationQuery extends PaginationOptionsQuery<TransactionFolderEntity> {
   @ApiPropertyOptional({

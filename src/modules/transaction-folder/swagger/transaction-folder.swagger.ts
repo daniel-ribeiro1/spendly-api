@@ -9,19 +9,19 @@ import {
   OmitType,
 } from '@nestjs/swagger';
 
-export class CreateTransactionFolderSwaggerModel extends OmitType(
+export class DefaultTransactionFolderSwaggerModel extends OmitType(
   TransactionFolderEntity,
   ['isActive', 'userId'],
 ) {}
 
-export function CreateTransactionFolderResponseSwagger(): MethodDecorator &
+export function DefaultTransactionFolderResponseSwagger(): MethodDecorator &
   ClassDecorator {
   return applyDecorators(
     ApiOperation({
       summary: 'Criar uma pasta de movimentação financeira do usuário.',
     }),
     ApiCreatedResponse({
-      type: CreateTransactionFolderSwaggerModel,
+      type: DefaultTransactionFolderSwaggerModel,
       description: 'Pasta de movimentação financeira criada com sucesso.',
     }),
     ApiUnauthorizedResponse({

@@ -1,20 +1,12 @@
 import { RequestException } from '@/core/exceptions/request.exception';
-import {
-  CreateTransactionFolderBody,
-  CreateTransactionFolderResponse,
-} from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
-import {
-  FindAllTransactionFolderResponse,
-  TransactionFolderPaginationQuery,
-} from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
-import {
-  UpdateTransactionFolderBody,
-  UpdateTransactionFolderResponse,
-} from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
+import { CreateTransactionFolderBody } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
+import { TransactionFolderPaginationQuery } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
+import { DefaultTransactionFolderResponse } from '@/modules/transaction-folder/dtos/transaction-folder.dto';
+import { UpdateTransactionFolderBody } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
+import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
-import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import { HttpStatus, Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -24,9 +16,28 @@ export class TransactionFolderService {
     private readonly transactionFolderRepository: TransactionFolderRepository,
   ) {}
 
+  async findOne(id: string) {
+    const requester = this.localStorageService.get('requester');
+
+    const transactionFolder =
+      await this.transactionFolderRepository.findByIdAndUserId(
+        id,
+        requester.id,
+      );
+
+    if (!transactionFolder) {
+      throw new RequestException(
+        Exception.TRANSACTION_FOLDER_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return transactionFolder;
+  }
+
   findAll(
     paginationQuery: TransactionFolderPaginationQuery,
-  ): Promise<PagedResponse<FindAllTransactionFolderResponse>> {
+  ): Promise<PagedResponse<DefaultTransactionFolderResponse>> {
     const requester = this.localStorageService.get('requester');
 
     return this.transactionFolderRepository.findAllPaged(
@@ -37,7 +48,7 @@ export class TransactionFolderService {
 
   async create(
     body: CreateTransactionFolderBody,
-  ): Promise<CreateTransactionFolderResponse> {
+  ): Promise<DefaultTransactionFolderResponse> {
     const requester = this.localStorageService.get('requester');
 
     return this.transactionFolderRepository.create({
@@ -49,7 +60,7 @@ export class TransactionFolderService {
   async update(
     id: string,
     body: UpdateTransactionFolderBody,
-  ): Promise<UpdateTransactionFolderResponse> {
+  ): Promise<DefaultTransactionFolderResponse> {
     const requester = this.localStorageService.get('requester');
     const transactionFolder =
       await this.transactionFolderRepository.findByIdAndUserId(

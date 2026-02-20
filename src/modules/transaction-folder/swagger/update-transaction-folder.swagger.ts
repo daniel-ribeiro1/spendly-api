@@ -1,4 +1,4 @@
-import { TransactionFolderEntity } from '@/modules/transaction-folder/entities/transaction-folder.entity';
+import { DefaultTransactionFolderSwaggerModel } from '@/modules/transaction-folder/swagger/transaction-folder.swagger';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { createRequestExceptionSwaggerModel } from '@/shared/swagger/request-exception.swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
@@ -7,13 +7,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiUnauthorizedResponse,
-  OmitType,
 } from '@nestjs/swagger';
-
-export class UpdateTransactionFolderSwaggerModel extends OmitType(
-  TransactionFolderEntity,
-  ['isActive', 'userId'],
-) {}
 
 export function UpdateTransactionFolderResponseSwagger(): MethodDecorator &
   ClassDecorator {
@@ -22,7 +16,7 @@ export function UpdateTransactionFolderResponseSwagger(): MethodDecorator &
       summary: 'Atualiza uma pasta de movimentação financeira do usuário.',
     }),
     ApiOkResponse({
-      type: UpdateTransactionFolderSwaggerModel,
+      type: DefaultTransactionFolderSwaggerModel,
       description: 'Pasta de movimentação financeira atualizada com sucesso.',
     }),
     ApiNotFoundResponse({

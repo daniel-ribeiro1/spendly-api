@@ -7,11 +7,8 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
 import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
 import { GlobalModule } from '@/modules/global/global.module';
-import {
-  CreateTransactionFolderBody,
-  CreateTransactionFolderResponse,
-} from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
-import { FindAllTransactionFolderResponse } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
+import { CreateTransactionFolderBody } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
+import { DefaultTransactionFolderResponse } from '@/modules/transaction-folder/dtos/transaction-folder.dto';
 import { TransactionFolderModule } from '@/modules/transaction-folder/transaction-folder.module';
 import { UserModule } from '@/modules/user/user.module';
 import { PagedResponse } from '@/shared/dtos/pagination.dto';
@@ -156,7 +153,7 @@ describe('TransactionFolderController (E2E)', () => {
         .send(body)
         .expect(HttpStatus.CREATED)
         .expect((res) => {
-          const response = res.body as CreateTransactionFolderResponse;
+          const response = res.body as DefaultTransactionFolderResponse;
           const updateBody = {
             name: 'E2E Transaction Folder Updated',
           };
@@ -195,7 +192,7 @@ describe('TransactionFolderController (E2E)', () => {
         .send(body)
         .expect(HttpStatus.CREATED)
         .expect((res) => {
-          const response = res.body as CreateTransactionFolderResponse;
+          const response = res.body as DefaultTransactionFolderResponse;
           const updateBody = {
             name: 'E2E Transaction Folder Updated',
           };
@@ -256,7 +253,7 @@ describe('TransactionFolderController (E2E)', () => {
         .send(body)
         .expect(HttpStatus.CREATED)
         .expect((res) => {
-          const createdResponse = res.body as CreateTransactionFolderResponse;
+          const createdResponse = res.body as DefaultTransactionFolderResponse;
 
           return request(app.getHttpServer())
             .get('/transaction-folder')
@@ -264,7 +261,7 @@ describe('TransactionFolderController (E2E)', () => {
             .expect(HttpStatus.OK)
             .expect((res) => {
               const findAllResponse =
-                res.body as PagedResponse<FindAllTransactionFolderResponse>;
+                res.body as PagedResponse<DefaultTransactionFolderResponse>;
               expect(findAllResponse.data[0]).toHaveProperty('id');
               expect(findAllResponse.data[0]).toHaveProperty('name');
               expect(findAllResponse.data[0]).toHaveProperty('description');
@@ -291,6 +288,87 @@ describe('TransactionFolderController (E2E)', () => {
           expect(res.body).toHaveProperty('message');
           expect(res.body).toMatchObject({
             path: '/transaction-folder',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.UNAUTHORIZED,
+            message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),
+          });
+        });
+    });
+  });
+
+  describe('(GET) /transaction-folder/:id', () => {
+    it('should get a transaction folder', () => {
+      const body: CreateTransactionFolderBody = {
+        name: 'E2E Transaction Folder',
+        description: 'E2E Transaction Folder Description',
+        image: null,
+      };
+
+      return request(app.getHttpServer())
+        .post('/transaction-folder')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(body)
+        .expect(HttpStatus.CREATED)
+        .expect((res) => {
+          const createdResponse = res.body as DefaultTransactionFolderResponse;
+
+          return request(app.getHttpServer())
+            .get(`/transaction-folder/${createdResponse.id}`)
+            .set('Authorization', `Bearer ${accessToken}`)
+            .expect(HttpStatus.OK)
+            .expect((res) => {
+              const findOneResponse =
+                res.body as DefaultTransactionFolderResponse;
+
+              expect(findOneResponse).toHaveProperty('id');
+              expect(findOneResponse).toHaveProperty('name');
+              expect(findOneResponse).toHaveProperty('description');
+              expect(findOneResponse).toHaveProperty('image');
+              expect(findOneResponse).toHaveProperty('createdAt');
+              expect(findOneResponse).toHaveProperty('updatedAt');
+
+              expect(findOneResponse).toMatchObject({
+                ...body,
+                id: createdResponse.id,
+              });
+            });
+        });
+    });
+
+    it('should throw an error if transaction folder is not found', () => {
+      return request(app.getHttpServer())
+        .get('/transaction-folder/nonexistent-id')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-folder/nonexistent-id',
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_FOLDER_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_FOLDER_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if user is not authenticated', () => {
+      return request(app.getHttpServer())
+        .get('/transaction-folder/nonexistent-id')
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-folder/nonexistent-id',
             status: HttpStatus.UNAUTHORIZED,
             exception: Exception.UNAUTHORIZED,
             message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),

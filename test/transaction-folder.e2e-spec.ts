@@ -376,4 +376,75 @@ describe('TransactionFolderController (E2E)', () => {
         });
     });
   });
+
+  describe('(DELETE) /transaction-folder/:id', () => {
+    it('should delete a transaction folder', () => {
+      const body: CreateTransactionFolderBody = {
+        name: 'E2E Transaction Folder',
+        description: 'E2E Transaction Folder Description',
+        image: null,
+      };
+
+      return request(app.getHttpServer())
+        .post('/transaction-folder')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(body)
+        .expect(HttpStatus.CREATED)
+        .expect((res) => {
+          const createdResponse = res.body as DefaultTransactionFolderResponse;
+
+          return request(app.getHttpServer())
+            .delete(`/transaction-folder/${createdResponse.id}`)
+            .set('Authorization', `Bearer ${accessToken}`)
+            .expect(HttpStatus.OK)
+            .expect(() => {
+              return request(app.getHttpServer())
+                .get(`/transaction-folder/${createdResponse.id}`)
+                .set('Authorization', `Bearer ${accessToken}`)
+                .expect(HttpStatus.NOT_FOUND);
+            });
+        });
+    });
+
+    it('should throw an error if transaction folder is not found', () => {
+      return request(app.getHttpServer())
+        .delete('/transaction-folder/nonexistent-id')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-folder/nonexistent-id',
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_FOLDER_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_FOLDER_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if user is not authenticated', () => {
+      return request(app.getHttpServer())
+        .delete('/transaction-folder/nonexistent-id')
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-folder/nonexistent-id',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.UNAUTHORIZED,
+            message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),
+          });
+        });
+    });
+  });
 });

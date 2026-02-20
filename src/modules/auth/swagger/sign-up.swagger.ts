@@ -1,6 +1,6 @@
 import { UserEntity } from '@/modules/user/entities/user.entity';
 import { Exception } from '@/shared/enums/exceptions.enum';
-import { createRequestExceptionSwaggerModel } from '@/shared/swagger/request-exception.swagger';
+import { createRequestExceptionSwaggerSchema } from '@/shared/swagger/request-exception.swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
   ApiConflictResponse,
@@ -30,11 +30,13 @@ export function SignUpResponseSwagger(): MethodDecorator & ClassDecorator {
     ApiConflictResponse({
       description:
         'Já existe um usuário cadastrado no sistema com o e-mail informado.',
-      type: createRequestExceptionSwaggerModel({
-        path,
-        status: HttpStatus.CONFLICT,
-        exception: Exception.USER_ALREADY_EXISTS,
-        message: 'A user with this email already exists.',
+      type: createRequestExceptionSwaggerSchema({
+        example: {
+          path,
+          status: HttpStatus.CONFLICT,
+          exception: Exception.USER_ALREADY_EXISTS,
+          message: 'A user with this email already exists.',
+        },
       }),
     }),
   );

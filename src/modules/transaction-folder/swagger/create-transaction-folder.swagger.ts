@@ -1,21 +1,21 @@
 import { DefaultTransactionFolderSwaggerModel } from '@/modules/transaction-folder/swagger/transaction-folder.swagger';
-import { ApiPagedResponse } from '@/shared/decorators/pagination.decorator';
 import { ApiCustomUnauthorizedResponse } from '@/shared/swagger/default-unauthorized.swagger';
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
 
-export function FindAllTransactionFolderResponseSwagger(): MethodDecorator &
+export function CreateTransactionFolderResponseSwagger(): MethodDecorator &
   ClassDecorator {
   return applyDecorators(
     ApiOperation({
-      summary: 'Listar todas as pastas de movimentação financeira do usuário.',
+      summary: 'Criar uma pasta de movimentação financeira do usuário.',
     }),
-    ApiPagedResponse(DefaultTransactionFolderSwaggerModel, {
-      description: 'Pastas de movimentação financeira listadas com sucesso.',
+    ApiCreatedResponse({
+      type: DefaultTransactionFolderSwaggerModel,
+      description: 'Pasta de movimentação financeira criada com sucesso.',
     }),
     ApiCustomUnauthorizedResponse({
       sehcma: {
-        name: 'RequestExceptionUnauthorizedFindAllTransactionFolder',
+        name: 'RequestExceptionUnauthorizedCreateTransactionFolder',
       },
       example: {
         path: '/transaction-folder',

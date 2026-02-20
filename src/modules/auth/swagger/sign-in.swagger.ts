@@ -1,5 +1,5 @@
 import { Exception } from '@/shared/enums/exceptions.enum';
-import { createRequestExceptionSwaggerModel } from '@/shared/swagger/request-exception.swagger';
+import { createRequestExceptionSwaggerSchema } from '@/shared/swagger/request-exception.swagger';
 import { applyDecorators, HttpStatus } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -35,11 +35,13 @@ export function SignInResponseSwagger(): MethodDecorator & ClassDecorator {
     }),
     ApiUnauthorizedResponse({
       description: 'E-mail e/ou senha inválidos.',
-      type: createRequestExceptionSwaggerModel({
-        path: '/auth/sign-in',
-        status: HttpStatus.UNAUTHORIZED,
-        exception: Exception.INVALID_CREDENTIALS,
-        message: 'Invalid email or password.',
+      type: createRequestExceptionSwaggerSchema({
+        example: {
+          path: '/auth/sign-in',
+          status: HttpStatus.UNAUTHORIZED,
+          exception: Exception.INVALID_CREDENTIALS,
+          message: 'Invalid email or password.',
+        },
       }),
     }),
   );

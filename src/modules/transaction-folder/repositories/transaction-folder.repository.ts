@@ -74,4 +74,11 @@ export class TransactionFolderRepository {
       data,
     });
   }
+
+  async softDelete(id: string): Promise<void> {
+    await this.prismaService.transactionFolder.update({
+      where: { id },
+      data: { isActive: false },
+    });
+  }
 }

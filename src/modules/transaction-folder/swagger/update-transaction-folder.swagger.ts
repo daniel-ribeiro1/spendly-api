@@ -9,7 +9,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 
-export function UpdateTransactionFolderResponseSwagger(): MethodDecorator &
+export function UpdateTransactionFolderSwaggerResponse(): MethodDecorator &
   ClassDecorator {
   return applyDecorators(
     ApiOperation({

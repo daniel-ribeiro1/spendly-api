@@ -4,7 +4,7 @@ import { ApiCustomUnauthorizedResponse } from '@/shared/swagger/default-unauthor
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation } from '@nestjs/swagger';
 
-export function FindAllTransactionFolderResponseSwagger(): MethodDecorator &
+export function FindAllTransactionFolderSwaggerResponse(): MethodDecorator &
   ClassDecorator {
   return applyDecorators(
     ApiOperation({

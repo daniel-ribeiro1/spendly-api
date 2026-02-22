@@ -3,13 +3,20 @@ import { AuthorizationMiddleware } from '@/core/middlewares/authorization.middle
 import { LocalStorageMiddleware } from '@/core/middlewares/local-storage.middleware';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { GlobalModule } from '@/modules/global/global.module';
+import { TransactionCategoryModule } from '@/modules/transaction-category/transaction-category.module';
 import { TransactionFolderModule } from '@/modules/transaction-folder/transaction-folder.module';
 import { UserModule } from '@/modules/user/user.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
 @Module({
   controllers: [AppController],
-  imports: [AuthModule, GlobalModule, TransactionFolderModule, UserModule],
+  imports: [
+    AuthModule,
+    GlobalModule,
+    TransactionCategoryModule,
+    TransactionFolderModule,
+    UserModule,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

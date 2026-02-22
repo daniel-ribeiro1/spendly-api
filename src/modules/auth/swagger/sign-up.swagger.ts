@@ -9,14 +9,14 @@ import {
   OmitType,
 } from '@nestjs/swagger';
 
-export class SignUpResponseSwaggerModel extends OmitType(UserEntity, [
+export class SignUpSwaggerResponseModel extends OmitType(UserEntity, [
   'isActive',
   'password',
   'createdAt',
   'updatedAt',
 ]) {}
 
-export function SignUpResponseSwagger(): MethodDecorator & ClassDecorator {
+export function SignUpSwaggerResponse(): MethodDecorator & ClassDecorator {
   const path = '/auth/sign-up';
 
   return applyDecorators(
@@ -24,7 +24,7 @@ export function SignUpResponseSwagger(): MethodDecorator & ClassDecorator {
       summary: 'Cadastrar um usuário no sistema.',
     }),
     ApiCreatedResponse({
-      type: SignUpResponseSwaggerModel,
+      type: SignUpSwaggerResponseModel,
       description: 'Usuário cadastrado com sucesso.',
     }),
     ApiConflictResponse({

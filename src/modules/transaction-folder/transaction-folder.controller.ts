@@ -3,11 +3,11 @@ import { TransactionFolderPaginationQuery } from '@/modules/transaction-folder/d
 import { DefaultTransactionFolderResponse } from '@/modules/transaction-folder/dtos/transaction-folder.dto';
 import { UpdateTransactionFolderBody } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderService } from '@/modules/transaction-folder/services/transaction-folder.service';
-import { CreateTransactionFolderResponseSwagger } from '@/modules/transaction-folder/swagger/create-transaction-folder.swagger';
-import { FindAllTransactionFolderResponseSwagger } from '@/modules/transaction-folder/swagger/find-all-transaction-folder.swagger';
-import { FindOneTransactionFolderResponseSwagger } from '@/modules/transaction-folder/swagger/find-one-transaction-folder.swagger';
-import { RemoveTransactionFolderResponseSwagger } from '@/modules/transaction-folder/swagger/remove-transaction-folder.swagger';
-import { UpdateTransactionFolderResponseSwagger } from '@/modules/transaction-folder/swagger/update-transaction-folder.swagger';
+import { CreateTransactionFolderSwaggerResponse } from '@/modules/transaction-folder/swagger/create-transaction-folder.swagger';
+import { FindAllTransactionFolderSwaggerResponse } from '@/modules/transaction-folder/swagger/find-all-transaction-folder.swagger';
+import { FindOneTransactionFolderSwaggerResponse } from '@/modules/transaction-folder/swagger/find-one-transaction-folder.swagger';
+import { RemoveTransactionFolderSwaggerResponse } from '@/modules/transaction-folder/swagger/remove-transaction-folder.swagger';
+import { UpdateTransactionFolderSwaggerResponse } from '@/modules/transaction-folder/swagger/update-transaction-folder.swagger';
 import { Serialize } from '@/shared/decorators/serialize.decorator';
 import { PagedResponse } from '@/shared/dtos/pagination.dto';
 import {
@@ -29,7 +29,7 @@ export class TransactionFolderController {
 
   @Get()
   @Serialize(DefaultTransactionFolderResponse)
-  @FindAllTransactionFolderResponseSwagger()
+  @FindAllTransactionFolderSwaggerResponse()
   findAll(
     @Query() paginationQuery: TransactionFolderPaginationQuery,
   ): Promise<PagedResponse<DefaultTransactionFolderResponse>> {
@@ -38,7 +38,7 @@ export class TransactionFolderController {
 
   @Post()
   @Serialize(DefaultTransactionFolderResponse)
-  @CreateTransactionFolderResponseSwagger()
+  @CreateTransactionFolderSwaggerResponse()
   create(
     @Body() body: CreateTransactionFolderBody,
   ): Promise<DefaultTransactionFolderResponse> {
@@ -47,14 +47,14 @@ export class TransactionFolderController {
 
   @Get(':id')
   @Serialize(DefaultTransactionFolderResponse)
-  @FindOneTransactionFolderResponseSwagger()
+  @FindOneTransactionFolderSwaggerResponse()
   findOne(@Param('id') id: string): Promise<DefaultTransactionFolderResponse> {
     return this.transactionFolderService.findOne(id);
   }
 
   @Patch(':id')
   @Serialize(DefaultTransactionFolderResponse)
-  @UpdateTransactionFolderResponseSwagger()
+  @UpdateTransactionFolderSwaggerResponse()
   update(
     @Param('id') id: string,
     @Body() body: UpdateTransactionFolderBody,
@@ -63,7 +63,7 @@ export class TransactionFolderController {
   }
 
   @Delete(':id')
-  @RemoveTransactionFolderResponseSwagger()
+  @RemoveTransactionFolderSwaggerResponse()
   softDelete(@Param('id') id: string): Promise<void> {
     return this.transactionFolderService.softDelete(id);
   }

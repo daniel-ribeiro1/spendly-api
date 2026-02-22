@@ -8,7 +8,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-export class SignInResponseSwaggerModel {
+export class SignInSwaggerResponseModel {
   @ApiProperty({
     description: 'Token de acesso do usuário',
     example:
@@ -24,13 +24,13 @@ export class SignInResponseSwaggerModel {
   refreshToken: string;
 }
 
-export function SignInResponseSwagger(): MethodDecorator & ClassDecorator {
+export function SignInSwaggerResponse(): MethodDecorator & ClassDecorator {
   return applyDecorators(
     ApiOperation({
       summary: 'Autenticar um usuário no sistema.',
     }),
     ApiCreatedResponse({
-      type: SignInResponseSwaggerModel,
+      type: SignInSwaggerResponseModel,
       description: 'Usuário autenticado com sucesso.',
     }),
     ApiUnauthorizedResponse({

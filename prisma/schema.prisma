@@ -62,15 +62,23 @@ model TransactionCategory {
   isActive  Boolean  @default(true) @db.Boolean
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  /**
+   * Quando o 'userId' é nulo, a categoria é considerada como
+   * 'default', ou seja, ela deve ser exibida para todos do sistema
+   */
   userId    String?  @db.Char(36)
 
   // Relations
   user         User?         @relation(fields: [userId], references: [id])
   transactions Transaction[]
+
+  // Constraints
+  @@unique([name, userId])
 }
 
 model Transaction {
   id                    String   @id @default(uuid()) @db.Char(36)
+  name                  String   @db.VarChar(255)
   amount                Decimal  @db.Decimal(10, 2)
   description           String?  @db.Text
   date                  DateTime @db.Date

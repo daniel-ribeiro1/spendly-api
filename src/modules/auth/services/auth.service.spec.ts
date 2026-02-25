@@ -1,6 +1,6 @@
 import { RequestException } from '@/core/exceptions/request.exception';
-import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpBody, SignUpResponse } from '@/modules/auth/dtos/sign-up.dto';
+import { SignInBody } from '@/modules/auth/dtos/sign-in.dto';
+import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
 import { AuthService } from '@/modules/auth/services/auth.service';
 import { UserJwtService } from '@/modules/user/services/user-jwt.service';
 import { UserService } from '@/modules/user/services/user.service';
@@ -58,9 +58,7 @@ describe('AuthService', () => {
     it('should create a new user', async () => {
       userService.create.mockResolvedValue(mockedCreatedUser);
 
-      const user = (await authService.signUp(
-        mockedSignUpDto,
-      )) as SignUpResponse;
+      const user = await authService.signUp(mockedSignUpDto);
 
       expect(user).toBeDefined();
       expect(user).toBe(mockedCreatedUser);
@@ -92,9 +90,7 @@ describe('AuthService', () => {
         });
       });
 
-      const user = (await authService.signUp(
-        mockedSignUpDto,
-      )) as SignUpResponse;
+      const user = await authService.signUp(mockedSignUpDto);
 
       expect(user.password).not.toBe(mockedSignUpDto.password);
     });
@@ -123,7 +119,7 @@ describe('AuthService', () => {
 
       userService.findByEmail.mockResolvedValue(mockedUser);
 
-      const user = (await authService.signIn(signInDto)) as SignInResponse;
+      const user = await authService.signIn(signInDto);
 
       expect(user).toBeDefined();
       expect(user).toHaveProperty('accessToken');

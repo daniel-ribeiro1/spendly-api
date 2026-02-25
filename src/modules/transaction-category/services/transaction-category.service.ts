@@ -2,6 +2,7 @@ import { RequestException } from '@/core/exceptions/request.exception';
 import { CreateTransactionCategoryBody } from '@/modules/transaction-category/dtos/create-transaction-category.dto';
 import { FindAllTransactionCategoryQuery } from '@/modules/transaction-category/dtos/find-all-transaction-category.dto';
 import { DefaultTransactionCategoryResponse } from '@/modules/transaction-category/dtos/transaction-category.dto';
+import { UpdateTransactionCategoryBody } from '@/modules/transaction-category/dtos/update-transaction-category.dto';
 import { TransactionCategoryRepository } from '@/modules/transaction-category/repositories/transaction-category.repository';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
@@ -19,18 +20,7 @@ export class TransactionCategoryService {
   ): Promise<DefaultTransactionCategoryResponse> {
     const requester = this.localStorageService.get('requester');
 
-    const category =
-      await this.transactionCategoryRepository.findByNameAndUserId(
-        body.name,
-        requester.id,
-      );
-
-    if (category) {
-      throw new RequestException(
-        Exception.TRANSACTION_CATEGORY_ALREADY_EXISTS,
-        HttpStatus.CONFLICT,
-      );
-    }
+    await this.validateCategoryNameByUser(body.name);
 
     return this.transactionCategoryRepository.create({
       ...body,
@@ -64,5 +54,46 @@ export class TransactionCategoryService {
     }
 
     return category;
+  }
+
+  async update(
+    id: string,
+    body: UpdateTransactionCategoryBody,
+  ): Promise<DefaultTransactionCategoryResponse> {
+    const requester = this.localStorageService.get('requester');
+    const category = await this.transactionCategoryRepository.findByIdAndUserId(
+      id,
+      requester.id,
+    );
+
+    if (!category) {
+      throw new RequestException(
+        Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    if (body?.name && body.name != category.name) {
+      await this.validateCategoryNameByUser(body.name);
+    }
+
+    return this.transactionCategoryRepository.update(id, body);
+  }
+
+  private async validateCategoryNameByUser(name: string): Promise<void> {
+    const requester = this.localStorageService.get('requester');
+
+    const category =
+      await this.transactionCategoryRepository.findByNameAndUserId(
+        name,
+        requester.id,
+      );
+
+    if (category) {
+      throw new RequestException(
+        Exception.TRANSACTION_CATEGORY_ALREADY_EXISTS,
+        HttpStatus.CONFLICT,
+      );
+    }
   }
 }

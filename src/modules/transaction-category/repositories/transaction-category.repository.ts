@@ -52,4 +52,23 @@ export class TransactionCategoryRepository {
       where: { id, userId, isActive: true },
     });
   }
+
+  update(
+    id: string,
+    data: Partial<TransactionCategory>,
+  ): Promise<TransactionCategory> {
+    let normalizedName: string | undefined;
+
+    if (data?.name) {
+      normalizedName = StringUtil.normalizeString(data.name);
+    }
+
+    return this.prismaService.transactionCategory.update({
+      where: { id },
+      data: {
+        ...data,
+        normalizedName,
+      },
+    });
+  }
 }

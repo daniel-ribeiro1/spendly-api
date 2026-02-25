@@ -334,4 +334,163 @@ describe('TransactionCategoryController (E2E)', () => {
         });
     });
   });
+
+  describe('(GET) /transaction-category/:id', () => {
+    const anotherRequester: SignUpBody = {
+      email: 'find-one-another-transaction-category-e2e@example.com',
+      name: 'Another E2E User',
+      password: 'Senh@123456',
+      picture: null,
+    };
+
+    let anotherRequesterAccessToken = '';
+
+    beforeAll(async () => {
+      await request(app.getHttpServer())
+        .post('/auth/sign-up')
+        .send(anotherRequester)
+        .expect(HttpStatus.CREATED);
+
+      const signInResponse = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          email: anotherRequester.email,
+          password: anotherRequester.password,
+        })
+        .expect(HttpStatus.CREATED);
+
+      const response = signInResponse.body as SignInResponse;
+      anotherRequesterAccessToken = response.accessToken;
+    });
+
+    afterEach(async () => {
+      await prismaService.transactionCategory.deleteMany({
+        where: {
+          user: {
+            OR: [{ email: requester.email }, { email: anotherRequester.email }],
+          },
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await prismaService.user.delete({
+        where: {
+          email: anotherRequester.email,
+        },
+      });
+    });
+
+    it('should find one transaction category', async () => {
+      const transactionCategoryBody: CreateTransactionCategoryBody = {
+        name: 'FindOneCategory',
+        image: null,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/transaction-category')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(transactionCategoryBody)
+        .expect(HttpStatus.CREATED);
+
+      const transactionCategory =
+        response.body as DefaultTransactionCategoryResponse;
+
+      return request(app.getHttpServer())
+        .get(`/transaction-category/${transactionCategory.id}`)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.OK)
+        .expect((res) => {
+          const response = res.body as DefaultTransactionCategoryResponse;
+
+          expect(response).toBeDefined();
+          expect(response).toMatchObject(transactionCategory);
+        });
+    });
+
+    it('should throw an error if transaction category does not exist', () => {
+      const transactionCategoryId = 'nonexistent-id';
+      const path = `/transaction-category/${transactionCategoryId}`;
+
+      return request(app.getHttpServer())
+        .get(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path,
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_CATEGORY_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if category belongs to another user', async () => {
+      const transactionCategoryAnotherRequesterBody: CreateTransactionCategoryBody =
+        {
+          name: 'CategoryAnotherRequester',
+          image: null,
+        };
+
+      const postTransactionCategoryAnotherRequesterResponse = await request(
+        app.getHttpServer(),
+      )
+        .post('/transaction-category')
+        .set('Authorization', `Bearer ${anotherRequesterAccessToken}`)
+        .send(transactionCategoryAnotherRequesterBody)
+        .expect(HttpStatus.CREATED);
+
+      const transactionCategoryAnotherRequester =
+        postTransactionCategoryAnotherRequesterResponse.body as DefaultTransactionCategoryResponse;
+
+      const path = `/transaction-category/${transactionCategoryAnotherRequester.id}`;
+
+      return request(app.getHttpServer())
+        .get(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path,
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_CATEGORY_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if user is not authenticated', () => {
+      return request(app.getHttpServer())
+        .get('/transaction-category/nonexistent-id')
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-category/nonexistent-id',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.UNAUTHORIZED,
+            message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),
+          });
+        });
+    });
+  });
 });

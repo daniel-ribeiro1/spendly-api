@@ -23,6 +23,7 @@ describe('TransactionCategoryService', () => {
             create: jest.fn(),
             findByNameAndUserId: jest.fn(),
             findAllByUserId: jest.fn(),
+            findByIdAndUserId: jest.fn(),
           },
         },
         {
@@ -131,6 +132,59 @@ describe('TransactionCategoryService', () => {
       expect(result).toBeDefined();
       expect(result).toHaveLength(foundCategories.length);
       expect(result[0]).toMatchObject(foundCategories[0]);
+    });
+  });
+
+  describe('findOne', () => {
+    const requester = {
+      id: '1',
+      email: 'zK9ZV@example.com',
+      name: 'John Doe',
+    };
+
+    const foundCategory: TransactionCategory = {
+      id: '1',
+      name: 'Example 1',
+      normalizedName: 'example 1',
+      image: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: requester.id,
+    };
+
+    it('should find one transaction category', async () => {
+      localStorageService.get.mockReturnValue(requester);
+      transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(
+        foundCategory,
+      );
+
+      const result = await transactionCategoryService.findOne(foundCategory.id);
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(foundCategory);
+    });
+
+    it('should throw an error if category not found', async () => {
+      localStorageService.get.mockReturnValue(requester);
+      transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(null);
+
+      await expect(
+        transactionCategoryService.findOne('nonexistent-id'),
+      ).rejects.toThrow();
+
+      await expect(
+        transactionCategoryService.findOne('nonexistent-id'),
+      ).rejects.toBeInstanceOf(RequestException);
+
+      await expect(
+        transactionCategoryService.findOne('nonexistent-id'),
+      ).rejects.toThrow(
+        new RequestException(
+          Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 });

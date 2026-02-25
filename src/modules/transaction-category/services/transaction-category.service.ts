@@ -48,4 +48,21 @@ export class TransactionCategoryService {
       query?.searchTerm,
     );
   }
+
+  async findOne(id: string): Promise<DefaultTransactionCategoryResponse> {
+    const requester = this.localStorageService.get('requester');
+    const category = await this.transactionCategoryRepository.findByIdAndUserId(
+      id,
+      requester.id,
+    );
+
+    if (!category) {
+      throw new RequestException(
+        Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    return category;
+  }
 }

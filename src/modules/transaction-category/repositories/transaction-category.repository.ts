@@ -43,4 +43,13 @@ export class TransactionCategoryRepository {
       },
     });
   }
+
+  findByIdAndUserId(
+    id: string,
+    userId: string,
+  ): Promise<TransactionCategory | null> {
+    return this.prismaService.transactionCategory.findFirst({
+      where: { id, userId, isActive: true },
+    });
+  }
 }

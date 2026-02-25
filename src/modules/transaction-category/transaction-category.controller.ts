@@ -3,8 +3,10 @@ import { FindAllTransactionCategoryQuery } from '@/modules/transaction-category/
 import { DefaultTransactionCategoryResponse } from '@/modules/transaction-category/dtos/transaction-category.dto';
 import { TransactionCategoryService } from '@/modules/transaction-category/services/transaction-category.service';
 import { CreateTransactionCategorySwaggerResponse } from '@/modules/transaction-category/swagger/create-transaction-category.swagger';
+import { FindAllTransactionCategorySwaggerResponse } from '@/modules/transaction-category/swagger/find-all-transaction-category.swagger';
+import { FindOneTransactionCategorySwaggerResponse } from '@/modules/transaction-category/swagger/find-one-transaction-category.swagger';
 import { Serialize } from '@/shared/decorators/serialize.decorator';
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 
 @Controller('transaction-category')
 export class TransactionCategoryController {
@@ -23,9 +25,19 @@ export class TransactionCategoryController {
 
   @Get()
   @Serialize(DefaultTransactionCategoryResponse)
+  @FindAllTransactionCategorySwaggerResponse()
   findAll(
     @Query() query: FindAllTransactionCategoryQuery,
   ): Promise<DefaultTransactionCategoryResponse[]> {
     return this.transactionCategoryService.findAll(query);
+  }
+
+  @Get(':id')
+  @Serialize(DefaultTransactionCategoryResponse)
+  @FindOneTransactionCategorySwaggerResponse()
+  findOne(
+    @Param('id') id: string,
+  ): Promise<DefaultTransactionCategoryResponse> {
+    return this.transactionCategoryService.findOne(id);
   }
 }

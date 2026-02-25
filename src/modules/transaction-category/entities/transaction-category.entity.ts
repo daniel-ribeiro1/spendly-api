@@ -69,4 +69,10 @@ export class TransactionCategoryEntity implements TransactionCategory {
   @IsString()
   @IsUUID()
   userId: string | null;
+
+  /**
+   *  Utilizado para normalizar o nome da categoria da movimentação financeira
+   * e facilitar a busca no banco de dados.
+   */
+  normalizedName: string;
 }

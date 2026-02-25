@@ -1,4 +1,5 @@
 import { PrismaService } from '@/shared/services/prisma.service';
+import { StringUtil } from '@/shared/utils/string.util';
 import { Injectable } from '@nestjs/common';
 import { TransactionCategory } from '@prisma/client';
 
@@ -10,7 +11,10 @@ export class TransactionCategoryRepository {
     data: Pick<TransactionCategory, 'name' | 'image' | 'userId'>,
   ): Promise<TransactionCategory> {
     return this.prismaService.transactionCategory.create({
-      data,
+      data: {
+        ...data,
+        normalizedName: StringUtil.normalizeString(data.name),
+      },
     });
   }
 
@@ -20,6 +24,23 @@ export class TransactionCategoryRepository {
   ): Promise<TransactionCategory | null> {
     return this.prismaService.transactionCategory.findFirst({
       where: { name, userId },
+    });
+  }
+
+  findAllByUserId(
+    userId: string,
+    searchTerm?: string,
+  ): Promise<TransactionCategory[]> {
+    return this.prismaService.transactionCategory.findMany({
+      where: {
+        normalizedName: searchTerm
+          ? {
+              contains: StringUtil.normalizeString(searchTerm),
+              mode: 'insensitive',
+            }
+          : undefined,
+        OR: [{ userId }, { userId: null }],
+      },
     });
   }
 }

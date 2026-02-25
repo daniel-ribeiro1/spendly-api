@@ -1,5 +1,6 @@
 import { RequestException } from '@/core/exceptions/request.exception';
 import { CreateTransactionCategoryBody } from '@/modules/transaction-category/dtos/create-transaction-category.dto';
+import { FindAllTransactionCategoryQuery } from '@/modules/transaction-category/dtos/find-all-transaction-category.dto';
 import { DefaultTransactionCategoryResponse } from '@/modules/transaction-category/dtos/transaction-category.dto';
 import { TransactionCategoryRepository } from '@/modules/transaction-category/repositories/transaction-category.repository';
 import { Exception } from '@/shared/enums/exceptions.enum';
@@ -35,5 +36,16 @@ export class TransactionCategoryService {
       ...body,
       userId: requester.id,
     });
+  }
+
+  async findAll(
+    query?: FindAllTransactionCategoryQuery,
+  ): Promise<DefaultTransactionCategoryResponse[]> {
+    const requester = this.localStorageService.get('requester');
+
+    return this.transactionCategoryRepository.findAllByUserId(
+      requester.id,
+      query?.searchTerm,
+    );
   }
 }

@@ -6,6 +6,7 @@ import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { TransactionCategory } from '@prisma/client';
 
 describe('TransactionCategoryService', () => {
   let transactionCategoryService: TransactionCategoryService;
@@ -21,6 +22,7 @@ describe('TransactionCategoryService', () => {
           useValue: {
             create: jest.fn(),
             findByNameAndUserId: jest.fn(),
+            findAllByUserId: jest.fn(),
           },
         },
         {
@@ -57,6 +59,7 @@ describe('TransactionCategoryService', () => {
         updatedAt: new Date(),
         userId: requester.id,
         isActive: true,
+        normalizedName: '',
         ...body,
       });
 
@@ -78,6 +81,7 @@ describe('TransactionCategoryService', () => {
         updatedAt: new Date(),
         userId: requester.id,
         isActive: true,
+        normalizedName: '',
         ...body,
       });
 
@@ -93,6 +97,40 @@ describe('TransactionCategoryService', () => {
           HttpStatus.CONFLICT,
         ),
       );
+    });
+  });
+
+  describe('findAll', () => {
+    const requester = {
+      id: '1',
+      email: 'zK9ZV@example.com',
+      name: 'John Doe',
+    };
+
+    const foundCategories: TransactionCategory[] = [
+      {
+        id: '1',
+        name: 'Example 1',
+        normalizedName: 'example 1',
+        image: null,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        userId: requester.id,
+      },
+    ];
+
+    it('should find all transaction categories', async () => {
+      localStorageService.get.mockReturnValue(requester);
+      transactionCategoryRepository.findAllByUserId.mockResolvedValue(
+        foundCategories,
+      );
+
+      const result = await transactionCategoryService.findAll();
+
+      expect(result).toBeDefined();
+      expect(result).toHaveLength(foundCategories.length);
+      expect(result[0]).toMatchObject(foundCategories[0]);
     });
   });
 });

@@ -39,7 +39,9 @@ export class TransactionCategoryService {
     );
   }
 
-  async findOne(id: string): Promise<DefaultTransactionCategoryResponse> {
+  async findOneByRequester(
+    id: string,
+  ): Promise<DefaultTransactionCategoryResponse> {
     const requester = this.localStorageService.get('requester');
     const category = await this.transactionCategoryRepository.findByIdAndUserId(
       id,
@@ -60,24 +62,18 @@ export class TransactionCategoryService {
     id: string,
     body: UpdateTransactionCategoryBody,
   ): Promise<DefaultTransactionCategoryResponse> {
-    const requester = this.localStorageService.get('requester');
-    const category = await this.transactionCategoryRepository.findByIdAndUserId(
-      id,
-      requester.id,
-    );
-
-    if (!category) {
-      throw new RequestException(
-        Exception.TRANSACTION_CATEGORY_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
-    }
+    const category = await this.findOneByRequester(id);
 
     if (body?.name && body.name != category.name) {
       await this.validateCategoryNameByUser(body.name);
     }
 
     return this.transactionCategoryRepository.update(id, body);
+  }
+
+  async hardDelete(id: string): Promise<void> {
+    const category = await this.findOneByRequester(id);
+    return this.transactionCategoryRepository.hardDelete(category.id);
   }
 
   private async validateCategoryNameByUser(name: string): Promise<void> {

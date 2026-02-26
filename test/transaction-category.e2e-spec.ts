@@ -3,6 +3,7 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 
 import { AppModule } from '@/app.module';
+import { setupRequestValidation } from '@/core/configs/request-validation.config';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
 import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
@@ -37,6 +38,8 @@ describe('TransactionCategoryController (E2E)', () => {
     }).compile();
 
     app = module.createNestApplication();
+
+    setupRequestValidation(app);
 
     await app.init();
 
@@ -286,7 +289,7 @@ describe('TransactionCategoryController (E2E)', () => {
         signInResponse.body as SignInResponse
       ).accessToken;
 
-      const postTransactionCategoryAnotherRequesterResponse = await request(
+      const postTransactionCategoryBelongsAnotherUserResponse = await request(
         app.getHttpServer(),
       )
         .post('/transaction-category')
@@ -298,7 +301,7 @@ describe('TransactionCategoryController (E2E)', () => {
         .expect(HttpStatus.CREATED);
 
       const transactionCategoryAnotherRequester =
-        postTransactionCategoryAnotherRequesterResponse.body as DefaultTransactionCategoryResponse;
+        postTransactionCategoryBelongsAnotherUserResponse.body as DefaultTransactionCategoryResponse;
 
       return request(app.getHttpServer())
         .get('/transaction-category')
@@ -435,22 +438,22 @@ describe('TransactionCategoryController (E2E)', () => {
     });
 
     it('should throw an error if category belongs to another user', async () => {
-      const transactionCategoryAnotherRequesterBody: CreateTransactionCategoryBody =
+      const transactionCategoryBelongsAnotherUserBody: CreateTransactionCategoryBody =
         {
           name: 'CategoryAnotherRequester',
           image: null,
         };
 
-      const postTransactionCategoryAnotherRequesterResponse = await request(
+      const postTransactionCategoryBelongsAnotherUserResponse = await request(
         app.getHttpServer(),
       )
         .post('/transaction-category')
         .set('Authorization', `Bearer ${anotherRequesterAccessToken}`)
-        .send(transactionCategoryAnotherRequesterBody)
+        .send(transactionCategoryBelongsAnotherUserBody)
         .expect(HttpStatus.CREATED);
 
       const transactionCategoryAnotherRequester =
-        postTransactionCategoryAnotherRequesterResponse.body as DefaultTransactionCategoryResponse;
+        postTransactionCategoryBelongsAnotherUserResponse.body as DefaultTransactionCategoryResponse;
 
       const path = `/transaction-category/${transactionCategoryAnotherRequester.id}`;
 
@@ -641,24 +644,24 @@ describe('TransactionCategoryController (E2E)', () => {
     });
 
     it('shloud throw an error if transaction category belongs to another user', async () => {
-      const transactionCategoryAnotherRequesterBody: CreateTransactionCategoryBody =
+      const transactionCategoryBelongsAnotherUserBody: CreateTransactionCategoryBody =
         {
           name: 'category to update',
           image: null,
         };
 
-      const postTransactionCategoryAnotherRequesterResponse = await request(
+      const postTransactionCategoryBelongsAnotherUserResponse = await request(
         app.getHttpServer(),
       )
         .post('/transaction-category')
         .set('Authorization', `Bearer ${anotherRequesterAccessToken}`)
-        .send(transactionCategoryAnotherRequesterBody)
+        .send(transactionCategoryBelongsAnotherUserBody)
         .expect(HttpStatus.CREATED);
 
-      const anotherRequesterTransactionCategory =
-        postTransactionCategoryAnotherRequesterResponse.body as DefaultTransactionCategoryResponse;
+      const transactionCategoryBelongsAnotherUser =
+        postTransactionCategoryBelongsAnotherUserResponse.body as DefaultTransactionCategoryResponse;
 
-      const path = `/transaction-category/${anotherRequesterTransactionCategory.id}`;
+      const path = `/transaction-category/${transactionCategoryBelongsAnotherUser.id}`;
 
       const updateTransactionCategoryBody: UpdateTransactionCategoryBody = {
         name: 'Updated Category',
@@ -690,6 +693,166 @@ describe('TransactionCategoryController (E2E)', () => {
     it('should throw an error if user is not authenticated', () => {
       return request(app.getHttpServer())
         .patch('/transaction-category/nonexistent-id')
+        .expect(HttpStatus.UNAUTHORIZED)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path: '/transaction-category/nonexistent-id',
+            status: HttpStatus.UNAUTHORIZED,
+            exception: Exception.UNAUTHORIZED,
+            message: i18nService.t(`exceptions.${Exception.UNAUTHORIZED}`),
+          });
+        });
+    });
+  });
+
+  describe('(DELETE) /transaction-category/:id', () => {
+    const anotherRequester: SignUpBody = {
+      email: 'delete-category-another-transaction-category-e2e@example.com',
+      name: 'Another E2E User',
+      password: 'Senh@123456',
+      picture: null,
+    };
+
+    let anotherRequesterAccessToken = '';
+
+    beforeAll(async () => {
+      await request(app.getHttpServer())
+        .post('/auth/sign-up')
+        .send(anotherRequester)
+        .expect(HttpStatus.CREATED);
+
+      const signInResponse = await request(app.getHttpServer())
+        .post('/auth/sign-in')
+        .send({
+          email: anotherRequester.email,
+          password: anotherRequester.password,
+        })
+        .expect(HttpStatus.CREATED);
+
+      const accessToken = (signInResponse.body as SignInResponse).accessToken;
+      anotherRequesterAccessToken = accessToken;
+    });
+
+    afterEach(async () => {
+      await prismaService.transactionCategory.deleteMany({
+        where: {
+          OR: [
+            { user: { email: requester.email } },
+            { user: { email: anotherRequester.email } },
+          ],
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await prismaService.user.delete({
+        where: {
+          email: anotherRequester.email,
+        },
+      });
+    });
+
+    it('should delete a transaction category', async () => {
+      const transactionCategoryBody: CreateTransactionCategoryBody = {
+        name: 'category to delete',
+        image: null,
+      };
+
+      const postTransactionCategoryResponse = await request(app.getHttpServer())
+        .post('/transaction-category')
+        .set('Authorization', `Bearer ${accessToken}`)
+        .send(transactionCategoryBody)
+        .expect(HttpStatus.CREATED);
+
+      const transactionCategory =
+        postTransactionCategoryResponse.body as DefaultTransactionCategoryResponse;
+
+      const path = `/transaction-category/${transactionCategory.id}`;
+
+      await request(app.getHttpServer())
+        .delete(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NO_CONTENT);
+
+      await request(app.getHttpServer())
+        .get(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND);
+    });
+
+    it('should throw an error if transaction category not found', () => {
+      const path = '/transaction-category/nonexistent-id';
+
+      return request(app.getHttpServer())
+        .delete(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path,
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_CATEGORY_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if category belongs to another user', async () => {
+      const transactionCategoryBelongsAnotherUserBody: CreateTransactionCategoryBody =
+        {
+          name: 'category to delete',
+          image: null,
+        };
+
+      const postTransactionCategoryBelongsAnotherUserResponse = await request(
+        app.getHttpServer(),
+      )
+        .post('/transaction-category')
+        .set('Authorization', `Bearer ${anotherRequesterAccessToken}`)
+        .send(transactionCategoryBelongsAnotherUserBody)
+        .expect(HttpStatus.CREATED);
+
+      const transactionCategoryBelongsAnotherUser =
+        postTransactionCategoryBelongsAnotherUserResponse.body as DefaultTransactionCategoryResponse;
+
+      const path = `/transaction-category/${transactionCategoryBelongsAnotherUser.id}`;
+
+      return request(app.getHttpServer())
+        .delete(path)
+        .set('Authorization', `Bearer ${accessToken}`)
+        .expect(HttpStatus.NOT_FOUND)
+        .expect((res) => {
+          expect(res.body).toHaveProperty('path');
+          expect(res.body).toHaveProperty('status');
+          expect(res.body).toHaveProperty('exception');
+          expect(res.body).toHaveProperty('message');
+
+          expect(res.body).toMatchObject({
+            path,
+            status: HttpStatus.NOT_FOUND,
+            exception: Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            message: i18nService.t(
+              `exceptions.${Exception.TRANSACTION_CATEGORY_NOT_FOUND}`,
+            ),
+          });
+        });
+    });
+
+    it('should throw an error if user is not authenticated', () => {
+      return request(app.getHttpServer())
+        .delete('/transaction-category/nonexistent-id')
         .expect(HttpStatus.UNAUTHORIZED)
         .expect((res) => {
           expect(res.body).toHaveProperty('path');

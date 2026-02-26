@@ -26,6 +26,7 @@ describe('TransactionCategoryService', () => {
             findAllByUserId: jest.fn(),
             findByIdAndUserId: jest.fn(),
             update: jest.fn(),
+            hardDelete: jest.fn(),
           },
         },
         {
@@ -161,7 +162,9 @@ describe('TransactionCategoryService', () => {
         foundCategory,
       );
 
-      const result = await transactionCategoryService.findOne(foundCategory.id);
+      const result = await transactionCategoryService.findOneByRequester(
+        foundCategory.id,
+      );
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(foundCategory);
@@ -172,15 +175,15 @@ describe('TransactionCategoryService', () => {
       transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        transactionCategoryService.findOne('nonexistent-id'),
+        transactionCategoryService.findOneByRequester('nonexistent-id'),
       ).rejects.toThrow();
 
       await expect(
-        transactionCategoryService.findOne('nonexistent-id'),
+        transactionCategoryService.findOneByRequester('nonexistent-id'),
       ).rejects.toBeInstanceOf(RequestException);
 
       await expect(
-        transactionCategoryService.findOne('nonexistent-id'),
+        transactionCategoryService.findOneByRequester('nonexistent-id'),
       ).rejects.toThrow(
         new RequestException(
           Exception.TRANSACTION_CATEGORY_NOT_FOUND,
@@ -215,9 +218,10 @@ describe('TransactionCategoryService', () => {
 
     it('should update a transaction category', async () => {
       localStorageService.get.mockReturnValue(requester);
-      transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(
-        foundCategory,
-      );
+
+      jest
+        .spyOn(transactionCategoryService, 'findOneByRequester')
+        .mockResolvedValue(foundCategory);
 
       transactionCategoryRepository.update.mockResolvedValue({
         ...foundCategory,
@@ -235,7 +239,15 @@ describe('TransactionCategoryService', () => {
 
     it('should throw an error if category not found', async () => {
       localStorageService.get.mockReturnValue(requester);
-      transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(null);
+
+      jest
+        .spyOn(transactionCategoryService, 'findOneByRequester')
+        .mockRejectedValue(
+          new RequestException(
+            Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            HttpStatus.NOT_FOUND,
+          ),
+        );
 
       await expect(
         transactionCategoryService.update('nonexistent-id', body),
@@ -257,9 +269,10 @@ describe('TransactionCategoryService', () => {
 
     it('should throw an error if category name already exists', async () => {
       localStorageService.get.mockReturnValue(requester);
-      transactionCategoryRepository.findByIdAndUserId.mockResolvedValue(
-        foundCategory,
-      );
+
+      jest
+        .spyOn(transactionCategoryService, 'findOneByRequester')
+        .mockResolvedValue(foundCategory);
 
       jest
         .spyOn(transactionCategoryService as any, 'validateCategoryNameByUser')
@@ -284,6 +297,69 @@ describe('TransactionCategoryService', () => {
         new RequestException(
           Exception.TRANSACTION_CATEGORY_ALREADY_EXISTS,
           HttpStatus.CONFLICT,
+        ),
+      );
+    });
+  });
+
+  describe('hardDelete', () => {
+    const requester = {
+      id: '1',
+      email: 'zK9ZV@example.com',
+      name: 'John Doe',
+    };
+
+    const foundCategory: TransactionCategory = {
+      id: '1',
+      name: 'Example 1',
+      normalizedName: 'example 1',
+      image: null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      userId: requester.id,
+    };
+
+    it('should delete a transaction category', async () => {
+      localStorageService.get.mockReturnValue(requester);
+
+      jest
+        .spyOn(transactionCategoryService, 'findOneByRequester')
+        .mockResolvedValue(foundCategory);
+
+      transactionCategoryRepository.hardDelete.mockResolvedValue();
+
+      await expect(
+        transactionCategoryService.hardDelete(foundCategory.id),
+      ).resolves.toBeUndefined();
+    });
+
+    it('should throw an error if category not found', async () => {
+      localStorageService.get.mockReturnValue(requester);
+
+      jest
+        .spyOn(transactionCategoryService, 'findOneByRequester')
+        .mockRejectedValue(
+          new RequestException(
+            Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+            HttpStatus.NOT_FOUND,
+          ),
+        );
+
+      await expect(
+        transactionCategoryService.hardDelete('nonexistent-id'),
+      ).rejects.toThrow();
+
+      await expect(
+        transactionCategoryService.hardDelete('nonexistent-id'),
+      ).rejects.toBeInstanceOf(RequestException);
+
+      await expect(
+        transactionCategoryService.hardDelete('nonexistent-id'),
+      ).rejects.toThrow(
+        new RequestException(
+          Exception.TRANSACTION_CATEGORY_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
         ),
       );
     });

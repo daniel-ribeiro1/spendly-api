@@ -71,4 +71,10 @@ export class TransactionCategoryRepository {
       },
     });
   }
+
+  async hardDelete(id: string): Promise<void> {
+    await this.prismaService.transactionCategory.delete({
+      where: { id },
+    });
+  }
 }

@@ -15,6 +15,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -63,6 +65,7 @@ export class TransactionFolderController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @RemoveTransactionFolderSwaggerResponse()
   softDelete(@Param('id') id: string): Promise<void> {
     return this.transactionFolderService.softDelete(id);

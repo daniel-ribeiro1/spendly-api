@@ -2,6 +2,7 @@ import { I18nService } from 'nestjs-i18n';
 import request from 'supertest';
 import { App } from 'supertest/types';
 
+import { setupRequestValidation } from '@/core/configs/request-validation.config';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { SignInBody } from '@/modules/auth/dtos/sign-in.dto';
 import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
@@ -17,19 +18,22 @@ describe('AuthController (E2E)', () => {
   let prismaService: PrismaService;
   let i18nService: I18nService;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [AuthModule, UserModule, GlobalModule],
     }).compile();
 
     app = module.createNestApplication();
+
+    setupRequestValidation(app);
+
     prismaService = app.get(PrismaService);
     i18nService = app.get(I18nService);
 
     await app.init();
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await app.close();
   });
 
@@ -42,14 +46,9 @@ describe('AuthController (E2E)', () => {
     };
 
     afterEach(async () => {
-      const user = await prismaService.user.findUnique({
+      await prismaService.user.deleteMany({
         where: { email: signUpDto.email },
       });
-
-      if (user)
-        await prismaService.user.delete({
-          where: { id: user.id },
-        });
     });
 
     it('should create a new user', () => {
@@ -105,14 +104,9 @@ describe('AuthController (E2E)', () => {
     };
 
     afterEach(async () => {
-      const user = await prismaService.user.findUnique({
+      await prismaService.user.deleteMany({
         where: { email: signUpDto.email },
       });
-
-      if (user)
-        await prismaService.user.delete({
-          where: { id: user.id },
-        });
     });
 
     it('should authenticate a user', async () => {
@@ -129,6 +123,8 @@ describe('AuthController (E2E)', () => {
     });
 
     it('should throw an error if user is not found', async () => {
+      // await request(app.getHttpServer()).post('/auth/sign-up').send(signUpDto);
+
       return request(app.getHttpServer())
         .post('/auth/sign-in')
         .send(signInDto)

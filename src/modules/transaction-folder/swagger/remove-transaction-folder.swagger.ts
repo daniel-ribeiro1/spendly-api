@@ -1,6 +1,6 @@
 import { ApiCustomUnauthorizedResponse } from '@/shared/swagger/default-unauthorized.swagger';
 import { applyDecorators } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiNoContentResponse, ApiOperation } from '@nestjs/swagger';
 
 export function RemoveTransactionFolderSwaggerResponse(): MethodDecorator &
   ClassDecorator {
@@ -9,7 +9,7 @@ export function RemoveTransactionFolderSwaggerResponse(): MethodDecorator &
       summary:
         'Remover logicamente uma pasta de movimentação financeira do usuário.',
     }),
-    ApiOkResponse({
+    ApiNoContentResponse({
       description: 'Pasta de movimentação financeira removida com sucesso.',
     }),
     ApiCustomUnauthorizedResponse({

@@ -53,6 +53,9 @@ model TransactionType {
 
   // Relations
   transactions Transaction[]
+
+  // Constraints
+  @@unique([name])
 }
 
 model TransactionCategory {

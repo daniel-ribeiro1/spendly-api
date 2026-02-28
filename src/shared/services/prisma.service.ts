@@ -1,4 +1,4 @@
-import { PEISMA_ADAPTER } from '@/core/configs/database.config';
+import { PRISMA_ADAPTER } from '@/core/configs/database.config';
 import {
   Inject,
   Injectable,
@@ -14,7 +14,7 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor(
-    @Inject(PEISMA_ADAPTER) adapter: DatabaseClient.SqlDriverAdapterFactory,
+    @Inject(PRISMA_ADAPTER) adapter: DatabaseClient.SqlDriverAdapterFactory,
   ) {
     super({
       adapter,

@@ -3,8 +3,9 @@ import { TransactionTypeService } from '@/modules/transaction-type/services/tran
 import { FindAllTransactionTypeSwaggerResponse } from '@/modules/transaction-type/swagger/find-all-transaction-type.swagger';
 import { Serialize } from '@/shared/decorators/serialize.decorator';
 import { Controller, Get } from '@nestjs/common';
+import { TransactionType } from '@prisma/client';
 
-@Controller('transaction-type')
+@Controller('transaction-types')
 export class TransactionTypeController {
   constructor(
     private readonly transactionTypeService: TransactionTypeService,
@@ -13,7 +14,7 @@ export class TransactionTypeController {
   @Get()
   @Serialize(DefaultTransactionTypeResponse)
   @FindAllTransactionTypeSwaggerResponse()
-  findAll(): Promise<DefaultTransactionTypeResponse[]> {
+  findAll(): Promise<TransactionType[]> {
     return this.transactionTypeService.findAll();
   }
 }

@@ -31,18 +31,13 @@ export class SerializeInterceptor implements NestInterceptor {
     response: PagedResponse<unknown>,
   ): PagedResponse<unknown> {
     return {
-      data: response.data.map((item) =>
-        plainToClass(this.classConstructor, item, {
-          enableImplicitConversion: true,
-          excludeExtraneousValues: true,
-        }),
-      ),
+      data: response.data.map((item) => this._defaultSerialize(item)),
       metadata: response.metadata,
     };
   }
 
-  private _defaultSerialize(response: unknown): unknown {
-    return plainToClass(this.classConstructor, response, {
+  private _defaultSerialize(item: unknown): unknown {
+    return plainToClass(this.classConstructor, item, {
       enableImplicitConversion: true,
       excludeExtraneousValues: true,
     });

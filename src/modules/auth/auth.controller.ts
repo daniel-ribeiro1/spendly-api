@@ -5,6 +5,7 @@ import { SignInSwaggerResponse } from '@/modules/auth/swagger/sign-in.swagger';
 import { SignUpSwaggerResponse } from '@/modules/auth/swagger/sign-up.swagger';
 import { Serialize } from '@/shared/decorators/serialize.decorator';
 import { Body, Controller, Post } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +14,7 @@ export class AuthController {
   @Post('sign-up')
   @Serialize(SignUpResponse)
   @SignUpSwaggerResponse()
-  signUp(@Body() body: SignUpBody): Promise<SignUpResponse> {
+  signUp(@Body() body: SignUpBody): Promise<User> {
     return this.authService.signUp(body);
   }
 

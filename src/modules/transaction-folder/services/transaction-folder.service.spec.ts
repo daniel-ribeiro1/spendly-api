@@ -275,7 +275,7 @@ describe('TransactionFolderService', () => {
         transactionFolder,
       );
 
-      const result = await transactionFolderService.findOne(
+      const result = await transactionFolderService.findOneByRequester(
         transactionFolder.id,
       );
 
@@ -295,15 +295,15 @@ describe('TransactionFolderService', () => {
       transactionFolderRepository.findByIdAndUserId.mockResolvedValue(null);
 
       await expect(
-        transactionFolderService.findOne('nonexistent-id'),
+        transactionFolderService.findOneByRequester('nonexistent-id'),
       ).rejects.toThrow();
 
       await expect(
-        transactionFolderService.findOne('nonexistent-id'),
+        transactionFolderService.findOneByRequester('nonexistent-id'),
       ).rejects.toBeInstanceOf(RequestException);
 
       await expect(
-        transactionFolderService.findOne('nonexistent-id'),
+        transactionFolderService.findOneByRequester('nonexistent-id'),
       ).rejects.toThrow(
         new RequestException(
           Exception.TRANSACTION_FOLDER_NOT_FOUND,

@@ -21,8 +21,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { TransactionCategory } from '@prisma/client';
 
-@Controller('transaction-category')
+@Controller('transaction-categories')
 export class TransactionCategoryController {
   constructor(
     private readonly transactionCategoryService: TransactionCategoryService,
@@ -33,7 +34,7 @@ export class TransactionCategoryController {
   @CreateTransactionCategorySwaggerResponse()
   create(
     @Body() body: CreateTransactionCategoryBody,
-  ): Promise<DefaultTransactionCategoryResponse> {
+  ): Promise<TransactionCategory> {
     return this.transactionCategoryService.create(body);
   }
 
@@ -42,16 +43,14 @@ export class TransactionCategoryController {
   @FindAllTransactionCategorySwaggerResponse()
   findAll(
     @Query() query: FindAllTransactionCategoryQuery,
-  ): Promise<DefaultTransactionCategoryResponse[]> {
+  ): Promise<TransactionCategory[]> {
     return this.transactionCategoryService.findAll(query);
   }
 
   @Get(':id')
   @Serialize(DefaultTransactionCategoryResponse)
   @FindOneTransactionCategorySwaggerResponse()
-  findOne(
-    @Param('id') id: string,
-  ): Promise<DefaultTransactionCategoryResponse> {
+  findOne(@Param('id') id: string): Promise<TransactionCategory> {
     return this.transactionCategoryService.findOneByRequester(id);
   }
 
@@ -61,7 +60,7 @@ export class TransactionCategoryController {
   update(
     @Param('id') id: string,
     @Body() body: UpdateTransactionCategoryBody,
-  ): Promise<DefaultTransactionCategoryResponse> {
+  ): Promise<TransactionCategory> {
     return this.transactionCategoryService.update(id, body);
   }
 

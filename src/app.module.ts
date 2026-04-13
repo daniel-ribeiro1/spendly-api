@@ -5,6 +5,7 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { GlobalModule } from '@/modules/global/global.module';
 import { TransactionCategoryModule } from '@/modules/transaction-category/transaction-category.module';
 import { TransactionFolderModule } from '@/modules/transaction-folder/transaction-folder.module';
+import { TransactionModule } from '@/modules/transaction/transaction.module';
 import { UserModule } from '@/modules/user/user.module';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 
@@ -15,6 +16,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
     GlobalModule,
     TransactionCategoryModule,
     TransactionFolderModule,
+    TransactionModule,
     UserModule,
   ],
 })

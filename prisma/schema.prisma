@@ -87,12 +87,12 @@ model Transaction {
   name                  String   @db.VarChar(255)
   amount                Decimal  @db.Decimal(10, 2)
   description           String?  @db.Text
-  date                  DateTime @db.Date
+  date                  DateTime
   isActive              Boolean  @default(true) @db.Boolean
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   userId                String   @db.Char(36)
-  transactionFolderId   String?  @db.Char(36)
+  transactionFolderId   String   @db.Char(36)
   transactionCategoryId String?  @db.Char(36)
   transactionTypeId     Int      @db.SmallInt
 
@@ -118,9 +118,9 @@ model RecurrencyType {
 
 model Recurrency {
   id               String    @id @default(uuid()) @db.Char(36)
-  month_date       DateTime? @db.Date
-  start_date       DateTime  @db.Date
-  end_date         DateTime? @db.Date
+  month_date       DateTime?
+  start_date       DateTime
+  end_date         DateTime?
   interval         Int       @db.SmallInt
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt

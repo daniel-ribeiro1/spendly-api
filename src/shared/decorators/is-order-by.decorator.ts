@@ -44,10 +44,10 @@ export function IsOrderBy<T, K = keyof T>(
   allowedFields: K[],
   validationOptions?: ValidationOptions,
 ): PropertyDecorator {
-  return (object: object, propertyName: string) => {
+  return (target: object, propertyName: string): void => {
     registerDecorator({
       name: 'isOrderBy',
-      target: object.constructor,
+      target: target.constructor,
       propertyName,
       options: validationOptions,
       constraints: allowedFields,

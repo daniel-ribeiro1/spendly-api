@@ -22,8 +22,9 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { TransactionFolder } from '@prisma/client';
 
-@Controller('transaction-folder')
+@Controller('transaction-folders')
 export class TransactionFolderController {
   constructor(
     private readonly transactionFolderService: TransactionFolderService,
@@ -34,7 +35,7 @@ export class TransactionFolderController {
   @FindAllTransactionFolderSwaggerResponse()
   findAll(
     @Query() paginationQuery: TransactionFolderPaginationQuery,
-  ): Promise<PagedResponse<DefaultTransactionFolderResponse>> {
+  ): Promise<PagedResponse<TransactionFolder>> {
     return this.transactionFolderService.findAll(paginationQuery);
   }
 
@@ -43,15 +44,15 @@ export class TransactionFolderController {
   @CreateTransactionFolderSwaggerResponse()
   create(
     @Body() body: CreateTransactionFolderBody,
-  ): Promise<DefaultTransactionFolderResponse> {
+  ): Promise<TransactionFolder> {
     return this.transactionFolderService.create(body);
   }
 
   @Get(':id')
   @Serialize(DefaultTransactionFolderResponse)
   @FindOneTransactionFolderSwaggerResponse()
-  findOne(@Param('id') id: string): Promise<DefaultTransactionFolderResponse> {
-    return this.transactionFolderService.findOne(id);
+  findOne(@Param('id') id: string): Promise<TransactionFolder> {
+    return this.transactionFolderService.findOneByRequester(id);
   }
 
   @Patch(':id')
@@ -60,7 +61,7 @@ export class TransactionFolderController {
   update(
     @Param('id') id: string,
     @Body() body: UpdateTransactionFolderBody,
-  ): Promise<DefaultTransactionFolderResponse> {
+  ): Promise<TransactionFolder> {
     return this.transactionFolderService.update(id, body);
   }
 

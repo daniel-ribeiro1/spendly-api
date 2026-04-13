@@ -1,6 +1,9 @@
+import { RequestException } from '@/core/exceptions/request.exception';
 import { TransactionTypeRepository } from '@/modules/transaction-type/repositories/transaction-type.repository';
 import { TransactionTypeService } from '@/modules/transaction-type/services/transaction-type.service';
+import { Exception } from '@/shared/enums/exceptions.enum';
 import { TransactionTypeName } from '@/shared/enums/transaction-type.enum';
+import { HttpStatus } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { TransactionType } from '@prisma/client';
 
@@ -14,7 +17,7 @@ describe('TransactionTypeService', () => {
         TransactionTypeService,
         {
           provide: TransactionTypeRepository,
-          useValue: { findAll: jest.fn() },
+          useValue: { findAll: jest.fn(), findById: jest.fn() },
         },
       ],
     }).compile();
@@ -44,6 +47,58 @@ describe('TransactionTypeService', () => {
 
       expect(result).toBeInstanceOf(Array);
       expect(result).toEqual(transactionTypes);
+    });
+  });
+
+  describe('findOne', () => {
+    it('should return a transaction type', async () => {
+      const transactionType: TransactionType = {
+        id: 1,
+        name: TransactionTypeName.INCOME,
+        order: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      transactionTypeRepository.findById.mockReturnValue(
+        Promise.resolve(transactionType),
+      );
+
+      const result = await transactionTypeService.findOne(transactionType.id);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(transactionType);
+    });
+
+    it('should throw an error if transaction type is not found', async () => {
+      const transactionType: TransactionType = {
+        id: 1,
+        name: TransactionTypeName.INCOME,
+        order: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      transactionTypeRepository.findById.mockReturnValue(Promise.resolve(null));
+
+      await expect(
+        transactionTypeService.findOne(transactionType.id),
+      ).rejects.toThrow();
+
+      await expect(
+        transactionTypeService.findOne(transactionType.id),
+      ).rejects.toBeInstanceOf(RequestException);
+
+      await expect(
+        transactionTypeService.findOne(transactionType.id),
+      ).rejects.toThrow(
+        new RequestException(
+          Exception.TRANSACTION_TYPE_NOT_FOUND,
+          HttpStatus.NOT_FOUND,
+        ),
+      );
     });
   });
 });

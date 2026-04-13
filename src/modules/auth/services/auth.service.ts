@@ -1,11 +1,12 @@
 import { RequestException } from '@/core/exceptions/request.exception';
 import { SignInBody, SignInResponse } from '@/modules/auth/dtos/sign-in.dto';
-import { SignUpBody, SignUpResponse } from '@/modules/auth/dtos/sign-up.dto';
+import { SignUpBody } from '@/modules/auth/dtos/sign-up.dto';
 import { UserJwtService } from '@/modules/user/services/user-jwt.service';
 import { UserService } from '@/modules/user/services/user.service';
 import { Exception } from '@/shared/enums/exceptions.enum';
 import { EncryptionUtil } from '@/shared/utils/encryption.util';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,7 @@ export class AuthService {
     private readonly userService: UserService,
   ) {}
 
-  async signUp(body: SignUpBody): Promise<SignUpResponse> {
+  async signUp(body: SignUpBody): Promise<User> {
     try {
       const user = await this.userService.findByEmail(body.email);
 

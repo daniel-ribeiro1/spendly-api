@@ -1,7 +1,6 @@
 import { RequestException } from '@/core/exceptions/request.exception';
 import { CreateTransactionFolderBody } from '@/modules/transaction-folder/dtos/create-transaction-folder.dto';
 import { TransactionFolderPaginationQuery } from '@/modules/transaction-folder/dtos/find-all-transaction-folder.dto';
-import { DefaultTransactionFolderResponse } from '@/modules/transaction-folder/dtos/transaction-folder.dto';
 import { UpdateTransactionFolderBody } from '@/modules/transaction-folder/dtos/update-transaction-folder.dto';
 import { TransactionFolderRepository } from '@/modules/transaction-folder/repositories/transaction-folder.repository';
 import { TransactionService } from '@/modules/transaction/services/transaction.service';
@@ -10,16 +9,17 @@ import { Exception } from '@/shared/enums/exceptions.enum';
 import { LocalStorageService } from '@/shared/services/local-storage.service';
 import { RollbackManager } from '@/shared/utils/rollback-manager.util';
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { TransactionFolder } from '@prisma/client';
 
 @Injectable()
 export class TransactionFolderService {
   constructor(
     private readonly localStorageService: LocalStorageService,
     private readonly transactionFolderRepository: TransactionFolderRepository,
-    protected readonly transactionService: TransactionService,
+    private readonly transactionService: TransactionService,
   ) {}
 
-  async findOne(id: string) {
+  async findOneByRequester(id: string): Promise<TransactionFolder> {
     const requester = this.localStorageService.get('requester');
 
     const transactionFolder =
@@ -40,7 +40,7 @@ export class TransactionFolderService {
 
   findAll(
     paginationQuery: TransactionFolderPaginationQuery,
-  ): Promise<PagedResponse<DefaultTransactionFolderResponse>> {
+  ): Promise<PagedResponse<TransactionFolder>> {
     const requester = this.localStorageService.get('requester');
 
     return this.transactionFolderRepository.findAllPaged(
@@ -49,9 +49,7 @@ export class TransactionFolderService {
     );
   }
 
-  async create(
-    body: CreateTransactionFolderBody,
-  ): Promise<DefaultTransactionFolderResponse> {
+  async create(body: CreateTransactionFolderBody): Promise<TransactionFolder> {
     const requester = this.localStorageService.get('requester');
 
     return this.transactionFolderRepository.create({
@@ -63,7 +61,7 @@ export class TransactionFolderService {
   async update(
     id: string,
     body: UpdateTransactionFolderBody,
-  ): Promise<DefaultTransactionFolderResponse> {
+  ): Promise<TransactionFolder> {
     const requester = this.localStorageService.get('requester');
     const transactionFolder =
       await this.transactionFolderRepository.findByIdAndUserId(

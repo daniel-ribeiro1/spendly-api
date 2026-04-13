@@ -126,6 +126,7 @@ describe('TransactionFolderController (E2E)', () => {
           expect(res.body).toHaveProperty('status');
           expect(res.body).toHaveProperty('exception');
           expect(res.body).toHaveProperty('message');
+
           expect(res.body).toMatchObject({
             path: '/transaction-folder',
             status: HttpStatus.UNAUTHORIZED,

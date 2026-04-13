@@ -9,4 +9,10 @@ export class TransactionTypeRepository {
   findAll(): Promise<TransactionType[]> {
     return this.prismaService.transactionType.findMany();
   }
+
+  findById(id: number): Promise<TransactionType | null> {
+    return this.prismaService.transactionType.findFirst({
+      where: { id, isActive: true },
+    });
+  }
 }

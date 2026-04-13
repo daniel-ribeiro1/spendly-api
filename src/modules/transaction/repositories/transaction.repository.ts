@@ -6,6 +6,24 @@ import { Transaction } from '@prisma/client';
 export class TransactionRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
+  create(
+    body: Pick<
+      Transaction,
+      | 'name'
+      | 'description'
+      | 'amount'
+      | 'date'
+      | 'transactionTypeId'
+      | 'transactionFolderId'
+      | 'transactionCategoryId'
+      | 'userId'
+    >,
+  ): Promise<Transaction> {
+    return this.prismaService.transaction.create({
+      data: body,
+    });
+  }
+
   findAllByTransactionFolderId(
     transactionFolderId: string,
   ): Promise<Transaction[]> {
